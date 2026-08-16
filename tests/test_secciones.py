@@ -81,3 +81,30 @@ def test_oferta_sin_seccion_de_requisitos():
     """frontend_react no tiene seccion de requisitos: 'requisitos' queda vacia."""
     s = secciones_oferta("Frontend React\nSobre el puesto\nNos importa el criterio.\n")
     assert s["requisitos"] == ""
+
+
+def test_una_cabecera_desconocida_cierra_la_seccion_de_requisitos():
+    """'Que ofrecemos' no esta en la lista, pero debe cerrar los requisitos.
+
+    Caso real y con dano medido: en la oferta frontend_react la seccion de
+    beneficios se quedaba DENTRO de los requisitos, y la frase 'donde diseno e
+    ingenieria deciden juntos' hacia que la oferta pareciera exigir un Grado.
+    Lucia Fernandez, que es la frontend del corpus y tiene FP, perdio el primer
+    puesto por un requisito que la oferta nunca escribio.
+    """
+    oferta = """Frontend React
+Lo que buscamos
+Alguien con criterio sobre accesibilidad.
+Que ofrecemos
+- Un equipo donde diseno e ingenieria deciden juntos.
+"""
+    s = secciones_oferta(oferta)
+    assert "criterio" in s["requisitos"]
+    assert "ingenieria" not in s["requisitos"]
+
+
+def test_una_cabecera_desconocida_con_dos_puntos_tambien_cierra():
+    oferta = "Requisitos\n- Grado en Informatica.\nOtras cosas:\n- Master en algo.\n"
+    s = secciones_oferta(oferta)
+    assert "Grado" in s["requisitos"]
+    assert "Master" not in s["requisitos"]

@@ -114,18 +114,51 @@ def secciones_cv(texto: str) -> dict[str, str]:
     return _segmentar(texto, _CABECERAS_CV, _es_cabecera_cv)
 
 
-def _es_cabecera_oferta(linea: str) -> bool:
-    """En una oferta las cabeceras no van en mayusculas, asi que se reconocen
-    por el titulo: linea corta, sin vinetas, cuyo texto esta en la lista.
+# Cabeceras que no aportan ningun requisito pero que TIENEN que reconocerse
+# igualmente, porque su unica funcion es CERRAR la seccion anterior.
+#
+# Sin esto se colaba un requisito inventado, con dano medido: en la oferta
+# frontend_react la seccion de beneficios se quedaba dentro de los requisitos, y
+# la frase "un equipo de producto donde diseno e ingenieria deciden juntos"
+# hacia que la oferta pareciera exigir un Grado. Lucia Fernandez, que es la
+# frontend del corpus y tiene FP, perdia el primer puesto por una titulacion que
+# la oferta nunca pidio.
+_CIERRES_OFERTA: frozenset[str] = frozenset({
+    "que ofrecemos", "what we offer", "que te ofrecemos", "beneficios", "benefits",
+    "sobre el puesto", "about the role", "about the job", "sobre nosotros",
+    "que haras en el dia a dia", "what you will do", "tus funciones",
+    "tus principales funciones seran", "funciones", "responsabilidades",
+    "trabajar con nosotros te aportara", "condiciones",
+})
 
-    Es mas estricto a proposito que en el CV. Una oferta es prosa, y cualquier
-    heuristica de forma (linea corta, acaba en dos puntos) se traga frases
-    sueltas del cuerpo.
+
+def _es_cabecera_oferta(linea: str) -> bool:
+    """Decide si una linea de la oferta abre una seccion nueva.
+
+    Cuenta como cabecera si el titulo esta en cualquiera de las dos listas (las
+    que aportan requisitos y las que solo cierran), o si es una linea corta
+    acabada en dos puntos, que en una oferta es siempre un rotulo.
+
+    Reconocer los cierres es tan importante como reconocer los requisitos: una
+    seccion que no se cierra se traga el texto siguiente, y ahi es donde
+    aparecen los falsos requisitos. Aun asi la lista no puede ser exhaustiva
+    —una oferta cualquiera puede rotular sus apartados como le de la gana— y por
+    eso el fallo se degrada hacia el lado seguro: lo que no se reconoce se queda
+    en la seccion en curso, y un requisito de mas se detecta al revisar los
+    avisos, mientras que uno de menos solo significa no filtrar.
     """
     limpia = linea.strip()
     if not limpia or len(limpia) > 60 or limpia.startswith(("-", "*", "•")):
         return False
-    return _normalizar(limpia).rstrip(":") in _CABECERAS_OFERTA
+
+    titulo = _normalizar(limpia).rstrip(":")
+    if titulo in _CABECERAS_OFERTA or titulo in _CIERRES_OFERTA:
+        return True
+
+    # Un rotulo acabado en dos puntos. Se exige que no lleve punto final ni
+    # coma para no confundirlo con una frase del cuerpo que acabe en dos puntos
+    # antes de una enumeracion.
+    return limpia.endswith(":") and "." not in limpia and "," not in limpia
 
 
 def secciones_oferta(texto: str) -> dict[str, str]:
