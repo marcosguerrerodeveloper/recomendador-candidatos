@@ -1,0 +1,53 @@
+Machine Learning Engineer
+
+Remote (EU time zones) · Full time
+Platform team · Recommendations and personalisation
+
+About the role
+
+We run the recommendation and personalisation services behind a marketplace
+used daily by hundreds of thousands of people. We are looking for a Machine
+Learning Engineer who is as comfortable training a model as keeping it healthy
+in production six months later. This is an engineering role: most of the work
+is about reliability, latency and reproducibility, not about chasing the last
+point of offline accuracy.
+
+What you will do
+
+- Own recommendation models end to end: training, evaluation, deployment and
+  monitoring.
+- Build reproducible training pipelines with versioned data and experiment
+  tracking.
+- Serve models behind low-latency APIs and keep tail latency under control.
+- Detect data and concept drift, and automate retraining when it is justified.
+- Run online experiments and connect offline metrics to business outcomes.
+- Work closely with backend engineers on the serving infrastructure.
+
+Requirements
+
+- At least 3 years of experience building and deploying machine learning
+  systems in production.
+- Bachelor's degree in Computer Science, Mathematics, Physics or a related
+  field.
+- Strong Python, including the scientific stack and at least one deep learning
+  framework (PyTorch or TensorFlow).
+- Solid software engineering practice: version control, testing, code review,
+  continuous integration.
+- Experience with containers (Docker) and orchestration in a production
+  environment.
+- Working knowledge of SQL and of a data warehouse.
+- Minimum English level C1 — this team works entirely in English.
+
+Nice to have
+
+- Experience with feature stores and model registries.
+- Familiarity with MLflow, Kubeflow or comparable tooling.
+- Exposure to recommender systems specifically (collaborative filtering,
+  two-tower retrieval, learning to rank).
+- Experience mentoring junior engineers.
+
+What we offer
+
+- Fully remote within European time zones.
+- Yearly learning budget and conference attendance.
+- A team that treats production incidents as engineering problems, not blame.

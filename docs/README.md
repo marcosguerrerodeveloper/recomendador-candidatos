@@ -17,7 +17,7 @@ principal.
 
 ## Sugerencia para la de Streamlit
 
-Elige `ejemplo_backend_python` en el desplegable y pulsa *Evaluar candidatos*: se
+Elige `backend_python_senior` en el desplegable y pulsa *Evaluar candidatos*: se
 ve a Ana Ruiz Melgar arriba con su diagrama de ángulo y el perfil de RRHH abajo
 del todo, que es la imagen que cuenta la historia de un vistazo.
 

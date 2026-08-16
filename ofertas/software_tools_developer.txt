@@ -1,0 +1,52 @@
+Software Tools Developer — Validación de Sistemas Energéticos
+
+Madrid (San Fernando de Henares) · En remoto con visitas puntuales a planta
+Jornada completa · Contratación estable
+
+Buscamos incorporar a un/a Desarrollador/a de Software para Validación de
+Sistemas Energéticos para participar en proyectos de desarrollo de herramientas
+software destinadas a la visualización, procesamiento de señales y
+automatización de pruebas en entornos de I+D relacionados con sistemas de
+energía. La posición es en modalidad remota, con visitas puntuales a la planta
+de San Fernando de Henares (Madrid).
+
+Tus principales funciones serán:
+
+- Desarrollar herramientas software para la visualización y procesamiento de
+  señales procedentes de bancos de ensayo.
+- Diseñar interfaces de usuario para aplicaciones de escritorio.
+- Automatizar informes de validación y ensayos.
+- Elaborar manuales de usuario y documentación técnica.
+- Revisar y controlar la calidad de la documentación generada.
+- Coordinarse con los equipos de I+D e Ingeniería para documentar los
+  resultados de validación.
+- Gestionar la documentación técnica asociada al desarrollo de software.
+- Garantizar el cumplimiento de los estándares de documentación establecidos.
+- Proponer mejoras y realizar mantenimiento evolutivo del código desarrollado.
+
+Requisitos:
+
+- Grado en Ingeniería Informática, Ingeniería Electrónica, Matemáticas, Física,
+  Ciencia de Datos o similar.
+- Al menos 1 año de experiencia en desarrollo de software (también se valorará
+  experiencia adquirida durante prácticas).
+- Nivel alto de Python.
+- Conocimientos de bases de datos SQL, SQLite o PostgreSQL.
+- Experiencia desarrollando interfaces gráficas de usuario para aplicaciones de
+  escritorio.
+- Nivel de inglés mínimo B2.
+- Capacidad para trabajar de forma autónoma y en equipos multidisciplinares.
+
+Se valorará:
+
+- Conocimientos de protocolos industriales (TCP/IP, Modbus, Profinet).
+- Experiencia con instrumentación electrónica y equipos de medida.
+- Capacidad para analizar, mantener y mejorar código existente.
+
+Trabajar con nosotros te aportará:
+
+- Contratación estable desde el primer momento.
+- Modalidad de trabajo principalmente remota con visitas puntuales a planta.
+- Participación en proyectos de I+D dentro del sector energético.
+- Colaboración con equipos internacionales.
+- Flexibilidad en la fecha de incorporación.

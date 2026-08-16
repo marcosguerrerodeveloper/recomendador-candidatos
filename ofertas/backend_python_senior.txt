@@ -1,0 +1,50 @@
+Desarrollador/a Backend Python Sénior
+
+Valencia · Híbrido (dos días de oficina) · Jornada completa
+Sector e-commerce · Equipo de producto
+
+Sobre el puesto
+
+Gestionamos una plataforma de comercio electrónico que mueve varios miles de
+pedidos diarios y queremos reforzar el equipo de backend con una persona que
+disfrute construyendo servicios sólidos y fáciles de mantener. Te incorporarás
+a un equipo de seis ingenieros que está migrando el monolito histórico hacia
+servicios desacoplados, con estrangulamiento progresivo y sin ventanas de
+mantenimiento.
+
+Qué harás en el día a día
+
+- Diseñar y desarrollar APIs REST para el catálogo, el carrito y el flujo de
+  pedidos.
+- Cuidar el modelo de datos relacional y mantener a raya los tiempos de
+  respuesta de las consultas más pesadas.
+- Participar en la migración a microservicios: identificar límites, extraer
+  servicios y garantizar la compatibilidad durante la transición.
+- Escribir pruebas automatizadas y revisar el código de tus compañeros.
+- Instrumentar y diagnosticar incidencias en producción.
+
+Requisitos
+
+- Mínimo 5 años de experiencia en desarrollo backend con Python.
+- Grado en Ingeniería Informática, Telecomunicaciones o titulación equivalente.
+- Dominio de Django REST Framework y/o FastAPI en producción.
+- Sólidos conocimientos de bases de datos relacionales (MySQL, PostgreSQL):
+  modelado, índices y análisis de planes de ejecución.
+- Experiencia con Redis para caché y Celery para tareas en segundo plano.
+- Despliegue en contenedores Docker sobre una cadena de integración continua.
+- Cultura de testing con pytest.
+- Nivel de inglés mínimo B2 para documentación técnica.
+
+Se valorará
+
+- Experiencia liderando migraciones de arquitectura sin cortes de servicio.
+- Conocimientos de RabbitMQ o Kafka.
+- Mentorización de perfiles junior.
+- Nociones de infraestructura como código (Terraform).
+
+Qué ofrecemos
+
+- Metodología ágil con equipos autónomos y responsabilidad real sobre el
+  producto.
+- Dos días de oficina y el resto en remoto.
+- Presupuesto anual de formación y asistencia a conferencias.

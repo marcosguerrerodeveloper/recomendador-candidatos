@@ -269,7 +269,7 @@ def _resolver_oferta(argumento: str) -> Path:
     Se prueba primero tal cual (ruta absoluta o relativa al cwd) y, si ahi no
     hay nada, se busca dentro de la carpeta OFERTAS_DIR del .env, anclada a la
     raiz del proyecto y no al cwd. Asi vale tanto la ruta completa como el
-    nombre suelto:  python match.py ejemplo_backend_python.txt
+    nombre suelto:  python match.py backend_python_senior.txt
     Tambien se prueba anadiendo la extension .txt, que es la unica que se usa.
     """
     carpeta = RAIZ / os.getenv("OFERTAS_DIR", "ofertas")

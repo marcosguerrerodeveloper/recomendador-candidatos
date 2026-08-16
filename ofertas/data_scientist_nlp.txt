@@ -1,0 +1,48 @@
+Data Scientist — Procesamiento de Lenguaje Natural
+
+Madrid · Híbrido (tres días de oficina) · Jornada completa
+Equipo de Búsqueda y Relevancia
+
+Sobre el puesto
+
+Nuestro buscador interno atiende millones de consultas al mes y la relevancia de
+los resultados es el principal motor de conversión del producto. Buscamos un/a
+Data Scientist especializado/a en lenguaje natural que se haga cargo de la
+calidad semántica de la búsqueda: entender por qué un resultado sube o baja,
+medirlo con rigor y mejorarlo sin romper lo que ya funciona.
+
+Qué harás en el día a día
+
+- Diseñar y evaluar modelos de recuperación semántica basados en embeddings.
+- Construir conjuntos de evaluación y métricas de relevancia (nDCG, MRR) que
+  reflejen el comportamiento real de los usuarios.
+- Ejecutar experimentos controlados y defender sus conclusiones con datos.
+- Afinar modelos de lenguaje preentrenados para las tareas del dominio.
+- Analizar las consultas sin resultado y convertirlas en mejoras concretas.
+- Documentar y comunicar los hallazgos al resto de producto e ingeniería.
+
+Requisitos
+
+- Máster en Ciencia de Datos, Inteligencia Artificial, Matemáticas o
+  equivalente.
+- Mínimo 4 años de experiencia en ciencia de datos, con experiencia demostrable
+  en proyectos de procesamiento de lenguaje natural.
+- Dominio de Python y del ecosistema científico (NumPy, pandas, scikit-learn).
+- Experiencia práctica con PyTorch y con la librería Transformers.
+- Conocimiento sólido de modelos de embeddings y búsqueda vectorial.
+- Rigor estadístico: diseño de experimentos e interpretación de significancia.
+- Nivel de inglés C1: leerás artículos técnicos y publicarás resultados
+  internos en inglés.
+
+Se valorará
+
+- Publicaciones, divulgación técnica o contribuciones a proyectos abiertos.
+- Experiencia poniendo un modelo en producción y midiendo su impacto.
+- Conocimiento de sistemas de recuperación clásicos (BM25) y de enfoques
+  híbridos.
+
+Qué ofrecemos
+
+- Problemas de relevancia reales, con volumen y con impacto medible.
+- Presupuesto para congresos y formación.
+- Horario flexible y formato híbrido.

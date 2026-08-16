@@ -1,0 +1,47 @@
+Data Engineer
+
+Barcelona · Híbrido · Jornada completa
+Plataforma de datos · Equipo de Data Platform
+
+Sobre el puesto
+
+Estamos construyendo la plataforma de datos que alimenta los cuadros de mando
+de negocio y los modelos de nuestro equipo de ciencia de datos. Buscamos un/a
+Data Engineer que se responsabilice de que los datos lleguen a tiempo, sean
+correctos y se puedan explicar cuando alguien pregunte de dónde salen.
+
+Qué harás en el día a día
+
+- Diseñar y mantener pipelines de ingesta y transformación desde las fuentes
+  operacionales hacia el almacén analítico.
+- Orquestar cargas con Airflow: dependencias, reintentos, alertas y SLA.
+- Modelar el almacén siguiendo un enfoque dimensional y documentarlo con dbt.
+- Implantar pruebas de calidad de datos y detectar rupturas de esquema antes de
+  que lleguen a los cuadros de mando.
+- Optimizar consultas y costes de almacenamiento particionando y compactando.
+- Trabajar codo con codo con analistas y científicos de datos para entender qué
+  necesitan de verdad.
+
+Requisitos
+
+- Al menos 3 años de experiencia como Data Engineer o en un puesto equivalente.
+- Grado en Ingeniería Informática, Matemáticas, Estadística o similar.
+- SQL avanzado: ventanas, CTE, análisis de planes de ejecución.
+- Python para procesamiento de datos (pandas, PySpark o equivalente).
+- Experiencia con Airflow u otro orquestador de flujos.
+- Conocimiento de formatos columnares (Parquet) y de un almacén analítico
+  (BigQuery, Snowflake, Redshift o similar).
+- Control de versiones y despliegue mediante integración continua.
+
+Se valorará
+
+- Experiencia con dbt y con pruebas de calidad de datos automatizadas.
+- Procesamiento en streaming (Kafka, Flink).
+- Nociones de gobierno del dato y linaje.
+- Inglés B2 o superior para trabajar con documentación y equipos remotos.
+
+Qué ofrecemos
+
+- Un equipo pequeño con autonomía real sobre las decisiones técnicas.
+- Formato híbrido y horario flexible.
+- Presupuesto de formación anual.

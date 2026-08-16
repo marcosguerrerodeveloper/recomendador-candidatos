@@ -1,0 +1,39 @@
+Desarrollador/a Frontend React
+
+Valencia · Híbrido · Jornada completa
+Equipo de Producto · Aplicación web de gestión
+
+Sobre el puesto
+
+Nuestra aplicación web la usan cada día equipos de operaciones que pasan
+jornadas enteras dentro de ella. Eso cambia las prioridades: aquí una interfaz
+lenta o poco accesible no es un detalle estético, es tiempo de trabajo perdido.
+Buscamos una persona de frontend a la que le importe ese detalle.
+
+Qué harás en el día a día
+
+- Desarrollar interfaces en React y TypeScript dentro de un sistema de diseño
+  compartido.
+- Cuidar el rendimiento percibido: tiempos de carga, re-renderizados y tamaño
+  del paquete.
+- Garantizar la accesibilidad de los componentes conforme a WCAG 2.2, incluida
+  la navegación completa por teclado y el uso con lector de pantalla.
+- Escribir pruebas de componente y de extremo a extremo.
+- Trabajar mano a mano con diseño de producto para convertir prototipos en
+  componentes reutilizables.
+- Mantener y hacer evolucionar la librería de componentes interna.
+
+Lo que buscamos
+
+Nos importa más cómo trabajas que cuánto tiempo llevas haciéndolo. Buscamos a
+alguien con criterio propio sobre accesibilidad y rendimiento, que sepa
+justificar sus decisiones de interfaz y que disfrute puliendo la experiencia de
+uso hasta que se sienta natural. Trabajamos con React, TypeScript, herramientas
+modernas de construcción y pruebas automatizadas; si dominas ese entorno y te
+interesa el resto, nos entenderemos.
+
+Qué ofrecemos
+
+- Horario flexible y formato híbrido.
+- Presupuesto anual de formación.
+- Un equipo de producto donde diseño e ingeniería deciden juntos.

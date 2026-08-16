@@ -124,7 +124,7 @@ docker compose up -d
 # 3. Pipeline en Python puro
 .\.venv\Scripts\python.exe db_setup.py          # crea el esquema
 .\.venv\Scripts\python.exe embed_and_store.py   # indexa los CVs de cvs/
-.\.venv\Scripts\python.exe match.py ejemplo_backend_python
+.\.venv\Scripts\python.exe match.py backend_python_senior
 ```
 
 Eso ya imprime un ranking. Las capas de arriba son opcionales:
