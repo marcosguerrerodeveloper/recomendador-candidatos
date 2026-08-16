@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 
 from db_setup import conectar
 from embed_and_store import embed, fragmentos_de, guardar_puesto
+from requisitos import evaluar, extraer_de_cv, extraer_de_oferta
 
 # Ruta explicita: load_dotenv() a secas parte del directorio del archivo que la
 # llama y puede acabar cargando otro .env o ninguno.
@@ -183,15 +184,20 @@ def rankear_detallado(
                 "score": similitud_coseno(vector_oferta, vector),
                 "fragmento": mejor_fragmento(vector_oferta, fragmentos),
             })
-        puntuaciones.sort(key=lambda fila: fila["score"], reverse=True)
+        # Los textos completos se leen una sola vez y sirven para las dos cosas:
+        # evaluar los requisitos y reconstruir el fragmento que se cita.
+        textos_cv = _textos_crudos(conn, [p["id"] for p in puntuaciones])
+
+        # El filtro se aplica ANTES de ordenar: el orden lo decide el score ya
+        # ajustado, no el coseno a secas.
+        aplicar_requisitos(puntuaciones, texto_oferta, textos_cv)
+        puntuaciones.sort(key=lambda fila: fila["score_ajustado"], reverse=True)
 
         # El texto del fragmento se reconstruye troceando de nuevo el CV, en vez
         # de guardarlo duplicado en la base de datos. El troceo es determinista,
-        # asi que el indice i devuelve siempre el mismo trozo. Solo se hace para
-        # los candidatos del ranking, no para todos.
-        textos = _textos_de_cv(conn, [p["id"] for p in puntuaciones])
+        # asi que el indice i devuelve siempre el mismo trozo.
         for fila in puntuaciones:
-            trozos = textos.get(fila["id"], [])
+            trozos = fragmentos_de(textos_cv.get(fila["id"], ""))
             fila["extracto"] = (
                 trozos[fila["fragmento"]] if fila["fragmento"] < len(trozos) else ""
             )
@@ -207,8 +213,8 @@ def rankear_detallado(
     return puntuaciones
 
 
-def _textos_de_cv(conn, ids: list[int]) -> dict[int, list[str]]:
-    """Trocea el CV de cada candidato para poder citar el fragmento ganador."""
+def _textos_crudos(conn, ids: list[int]) -> dict[int, str]:
+    """Texto completo del CV de cada candidato, sin trocear."""
     if not ids:
         return {}
 
@@ -220,7 +226,34 @@ def _textos_de_cv(conn, ids: list[int]) -> dict[int, list[str]]:
     filas = cursor.fetchall()
     cursor.close()
 
-    return {id_c: fragmentos_de(texto or "") for id_c, texto in filas}
+    return {id_c: (texto or "") for id_c, texto in filas}
+
+
+def aplicar_requisitos(
+    puntuaciones: list[dict], texto_oferta: str, textos_cv: dict[int, str]
+) -> list[dict]:
+    """Anade a cada fila la penalizacion por requisitos no cumplidos.
+
+    Se separa de rankear_detallado para poder probarla sin MySQL y sin cargar
+    el modelo de embeddings, que es lo que la hacia intocable estando dentro.
+
+    El score original NO se modifica: se anade 'score_ajustado'. Los dos viajan
+    juntos hasta la interfaz porque un unico numero ya corregido no permitiria
+    distinguir que parte es afinidad semantica y que parte es correccion por
+    requisitos, y esa distincion es justamente lo que hace el ranking revisable.
+
+    Los requisitos de la oferta se extraen UNA vez, fuera del bucle: son los
+    mismos para todos los candidatos.
+    """
+    requisitos = extraer_de_oferta(texto_oferta)
+
+    for fila in puntuaciones:
+        veredicto = evaluar(requisitos, extraer_de_cv(textos_cv.get(fila["id"], "")))
+        fila["penalizacion"] = veredicto.penalizacion
+        fila["avisos"] = veredicto.avisos
+        fila["score_ajustado"] = fila["score"] - veredicto.penalizacion
+
+    return puntuaciones
 
 
 def rankear(
