@@ -1,16 +1,9 @@
 # Recomendador de candidatos
 
-Sistema que recibe CVs en PDF y una descripción de puesto, y devuelve un ranking
-de candidatos ordenado por **afinidad semántica** — no por coincidencia de
-palabras clave. Un CV que dice *"diseño de pipelines ETL"* puntúa alto frente a
-una oferta que pide *"data engineering"* aunque no compartan ni una palabra.
-
-Todo corre en local: el modelo de embeddings, la base de datos y el cálculo de
-similitud. Sin APIs de pago ni servicios cloud.
-
----
-
-## Stack
+**Recibe CVs en PDF y una oferta de trabajo, y devuelve un ranking de candidatos
+por afinidad semántica.** No busca palabras clave: un CV que dice *"diseño de
+pipelines ETL"* puntúa alto frente a una oferta que pide *"data engineering"*
+aunque no compartan ni una palabra.
 
 ![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.13-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
@@ -23,26 +16,150 @@ similitud. Sin APIs de pago ni servicios cloud.
 ![n8n](https://img.shields.io/badge/n8n-2.8-EA4B71?style=flat-square&logo=n8n&logoColor=white)
 ![pytest](https://img.shields.io/badge/pytest-61%20tests-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
 
-| Área | Tecnología | Para qué, y por qué esa |
-|---|---|---|
-| **NLP / embeddings** | `sentence-transformers` 5.7 sobre PyTorch 2.13, modelo `paraphrase-multilingual-MiniLM-L12-v2` | Convierte CVs y ofertas en vectores de 384 dimensiones. **Multilingüe a propósito**: los CVs mezclan español e inglés, y un modelo solo-inglés no alinea el espacio semántico entre idiomas |
-| **Cálculo numérico** | NumPy 2.2 | Similitud coseno **escrita a mano**, no una caja negra de scikit-learn: el objetivo era poder explicar la fórmula |
-| **Extracción de PDF** | `pdfplumber` 0.11 | Texto limpio de CVs con columnas y tablas. Descartado PyPDF2, que falla con esa maquetación |
-| **Base de datos** | MySQL 8.0 en Docker, `mysql-connector-python` | Persistencia de candidatos, puestos y matches. El vector va serializado en JSON y la comparación se hace en Python — **MySQL no tiene tipo vector nativo**, y elegirlo en vez de una vector DB fue una decisión de escala, no desconocimiento |
-| **API** | FastAPI 0.141, Uvicorn, Pydantic 2.13 | Capa HTTP entre la orquestación y los scripts. Servicio permanente: cargar el modelo tarda segundos y así se paga una sola vez |
-| **Orquestación** | n8n 2.8 | Dos flujos con webhook: alta de candidato y ranking. Los nodos **llaman a la API, no reimplementan lógica** |
-| **Interfaz** | Streamlit 1.61 | Vitrina del ranking, con CSS propio y el ángulo del coseno dibujado |
-| **Pruebas** | pytest 9.1 — **61 pruebas en 6 s** | Cubren el extractor de requisitos. Corren sin base de datos ni modelo cargado, que es la razón de que ese módulo viva aislado |
-| **Infraestructura** | Docker Compose | MySQL reproducible, sin instalar nada en el sistema |
-| **Utilidades** | ReportLab | Generación de los 16 CVs ficticios que sirven de conjunto de prueba, con perfiles de distintas familias y dos controles negativos |
+![La vitrina mostrando el ranking para la oferta de data engineer](docs/streamlit_ranking.png)
 
-Lo que **no** hay, también a propósito: sin cloud, sin APIs de embeddings de pago,
-sin vector database y sin scraping de portales de empleo. Cada descarte está
-razonado en [Decisiones y por qué](#decisiones-y-por-qué).
+<sub>La oferta pide tres años de experiencia. **Elena Cortés gana por similitud
+pura** —su CV va exactamente del tema— pero tiene dos, así que queda segunda con
+el motivo escrito bajo su nombre, y pasa delante Kwame Osei, que sí los tiene. El
+ángulo de la izquierda no es decoración: **θ = arccos(afinidad)** es literalmente
+lo que calcula `match.py`. La regla de cada fila mide la puntuación en escala
+absoluta 0-1, sin normalizar al máximo de la lista, porque normalizar exageraría
+diferencias que en la zona media son ruido.</sub>
+
+| | |
+|---|---|
+| **Acierta el primer puesto** | en las 6 ofertas de prueba |
+| **Explica cada resultado** | cita el fragmento del CV que encaja, y por qué baja quien baja |
+| **61 pruebas** | corren en 6 s, sin base de datos ni modelo cargado |
+| **100 % local** | embeddings, base de datos y cálculo. Sin cloud ni APIs de pago |
 
 ---
 
-## Resultado de ejemplo
+## Lo que no ve la similitud, en una imagen
+
+Esta es la tabla `matches` entera: 18 candidatos × 6 ofertas, una celda por
+puntuación almacenada. Cuanto más encendida, mayor la afinidad.
+
+![Mapa de calor de las 108 puntuaciones almacenadas, 18 candidatos por 6 ofertas](docs/bd_datos.png)
+
+Se leen dos cosas de un vistazo, y las dos importan.
+
+**El máximo de cada columna cae en el perfil correcto** en cinco de las seis
+ofertas. La excepción es `data engineer`, donde gana la ingeniera **junior**:
+esta tabla guarda el coseno puro, y en el espacio de los embeddings «dos años» y
+«tres años» apuntan casi al mismo sitio. Para eso existe el **filtro de
+requisitos**, que la descuenta y explica por qué.
+
+**Y hay filas enteras encendidas o apagadas.** Un CV largo y transversal puntúa
+medio-alto contra todo; el contable sénior —control negativo— queda oscuro en las
+seis columnas. Es el efecto centroide, documentado abajo como limitación
+conocida en vez de escondido.
+
+---
+
+## Vista rápida
+
+| | |
+|---|---|
+| [Cómo funciona](#cómo-funciona) | el pipeline en seis pasos |
+| [Orquestación con n8n](#orquestación-con-n8n) | los dos flujos, con capturas |
+| [La base de datos](#la-base-de-datos) | esquema y por qué un vector vive en una celda JSON |
+| [El filtro de requisitos duros](#el-filtro-de-requisitos-duros) | años, titulación e idioma, extraídos del texto |
+| [Decisiones y por qué](#decisiones-y-por-qué) | lo que se descartó, y el motivo |
+| [Problemas reales](#problemas-reales-que-aparecieron) | los bugs que costaron trabajo |
+| [Limitaciones conocidas](#limitaciones-conocidas) | lo que este sistema no hace |
+
+---
+
+## Cómo funciona
+
+```
+CV.pdf ──► extract_text.py ──► embed_and_store.py ──► MySQL
+           (pdfplumber)        (sentence-transformers)  (texto + vector JSON)
+                                                            │
+oferta ──► embed_and_store.py ──► match.py ────────────────►┤
+           (mismo modelo)         (coseno con numpy)         │
+                                          │                  │
+                                          ▼                  ▼
+                                      ranking            tabla matches
+```
+
+Cada texto —CV u oferta— se convierte en un vector de 384 dimensiones que
+representa su *significado*. Comparar dos textos es entonces medir el ángulo
+entre sus vectores:
+
+```python
+similitud = dot(a, b) / (norm(a) * norm(b))
+```
+
+Se usa el coseno y no la distancia euclídea porque mide **dirección, no
+magnitud**. Un CV de tres páginas genera un vector con más "energía" acumulada
+que una oferta de diez líneas; con una métrica sensible al tamaño, los CVs largos
+ganarían por ser largos y no por ser afines. Al dividir por las dos normas esa
+diferencia desaparece y solo queda la pregunta relevante: *hacia dónde apunta
+cada texto*.
+
+### Las tres formas de usarlo
+
+El mismo pipeline se consume desde tres sitios distintos, y ninguno reimplementa
+lógica. Es la prueba de que la separación por capas es real:
+
+```
+terminal ──┐
+n8n ───────┼──► api.py ──► extract_text / embed_and_store / match ──► MySQL
+Streamlit ─┘
+```
+
+---
+
+## Orquestación con n8n
+
+**Flujo A — alta de candidato.** Un webhook recibe un PDF, la API lo extrae,
+lo embebe y lo guarda, y el tercer nodo responde.
+
+![Flujo A en n8n: Webhook CV, API alta candidato y Responder alta](docs/n8n_flujo_a.png)
+
+**Flujo B — ranking.** Un webhook recibe el texto de una oferta y devuelve el
+ranking ya calculado como respuesta HTTP.
+
+![Flujo B en n8n: Webhook Oferta, API match y Responder ranking](docs/n8n_flujo_b.png)
+
+Los dos tienen la misma forma a propósito, y esa es la idea: **n8n no
+reimplementa nada**. El nodo central es una llamada HTTP a `api.py`, que importa
+las funciones ya probadas del pipeline. Si se borran `api.py` y `n8n/`, el
+proyecto sigue funcionando entero por terminal.
+
+---
+
+## La base de datos
+
+`candidatos` lleva clave única por archivo, `puestos` por SHA-256 de la
+descripción y `matches` por el par candidato-puesto. Las tres hacen el pipeline
+idempotente: reprocesar no duplica nada.
+
+![Esquema de las tres tablas en MySQL, con tipos, claves y relaciones](docs/bd_esquema.png)
+
+La decisión que más se nota está en la columna `embedding`: **384 números dentro
+de una celda `JSON`**. MySQL 8 no tiene tipo vector, así que el embedding se
+serializa y la similitud se calcula en Python. Es lo que hace explicable el
+proyecto —la fórmula del coseno se lee en `match.py`, en cinco líneas— a costa de
+no escalar a millones de filas. Con 18 candidatos, esa contrapartida no existe.
+
+`matches` guarda el **coseno puro**, no la puntuación ya corregida por
+requisitos. Esta tabla es el registro de la medida semántica, y la corrección
+depende de reglas que pueden cambiar sin que cambie el modelo: mezclarlas en una
+columna llamada `score` sería confundir dos cosas distintas. Es la tabla que se
+ve [en el mapa de calor de arriba](#lo-que-no-ve-la-similitud-en-una-imagen).
+
+---
+
+## Rankings completos
+
+<details>
+<summary><b>Los cinco primeros de cada una de las seis ofertas</b> — con la
+puntuación antes y después del filtro (clic para desplegar)</summary>
+
+<br>
 
 Dieciocho candidatos frente a seis ofertas redactadas con el formato y el nivel
 de detalle de una oferta real, requisitos incluidos. Dieciséis candidatos son
@@ -138,6 +255,8 @@ El primer puesto es fiable; el undécimo no lo es. El filtro de requisitos no
 arregla esto, porque el problema no es de idoneidad sino de resolución del
 coseno: ninguna de esas ofertas exige un requisito que ella incumpla.
 
+</details>
+
 ---
 
 ## El filtro de requisitos duros
@@ -222,47 +341,6 @@ controles negativos ya estaban al fondo, así que quedaba poco margen. **Donde e
 filtro se nota de verdad es en la zona alta**, que es la que se mira: es lo que
 separa al data engineer sénior de la junior, y ese cambio no aparece en una media
 de posiciones.
-
-
-
-## Cómo funciona
-
-```
-CV.pdf ──► extract_text.py ──► embed_and_store.py ──► MySQL
-           (pdfplumber)        (sentence-transformers)  (texto + vector JSON)
-                                                            │
-oferta ──► embed_and_store.py ──► match.py ────────────────►┤
-           (mismo modelo)         (coseno con numpy)         │
-                                          │                  │
-                                          ▼                  ▼
-                                      ranking            tabla matches
-```
-
-Cada texto —CV u oferta— se convierte en un vector de 384 dimensiones que
-representa su *significado*. Comparar dos textos es entonces medir el ángulo
-entre sus vectores:
-
-```python
-similitud = dot(a, b) / (norm(a) * norm(b))
-```
-
-Se usa el coseno y no la distancia euclídea porque mide **dirección, no
-magnitud**. Un CV de tres páginas genera un vector con más "energía" acumulada
-que una oferta de diez líneas; con una métrica sensible al tamaño, los CVs largos
-ganarían por ser largos y no por ser afines. Al dividir por las dos normas esa
-diferencia desaparece y solo queda la pregunta relevante: *hacia dónde apunta
-cada texto*.
-
-### Las tres formas de usarlo
-
-El mismo pipeline se consume desde tres sitios distintos, y ninguno reimplementa
-lógica. Es la prueba de que la separación por capas es real:
-
-```
-terminal ──┐
-n8n ───────┼──► api.py ──► extract_text / embed_and_store / match ──► MySQL
-Streamlit ─┘
-```
 
 ---
 
@@ -513,63 +591,34 @@ cadenas de texto en datos comparables y nada más. Por eso sus 61 pruebas corren
 en seis segundos sin levantar ningún servicio, y por eso está en un fichero
 aparte en lugar de dentro de `match.py`.
 
-### La base de datos
-
-`candidatos` lleva clave única por archivo, `puestos` por SHA-256 de la
-descripción y `matches` por el par candidato-puesto. Las tres hacen el pipeline
-idempotente: reprocesar no duplica nada.
-
-![Esquema de las tres tablas en MySQL, con tipos, claves y relaciones](docs/bd_esquema.png)
-
-La decisión que más se nota está en la columna `embedding`: **384 números dentro
-de una celda `JSON`**. MySQL 8 no tiene tipo vector, así que el embedding se
-serializa y la similitud se calcula en Python. Es lo que hace explicable el
-proyecto —la fórmula del coseno se lee en `match.py`, en cinco líneas— a costa de
-no escalar a millones de filas. Con 18 candidatos, esa contrapartida no existe.
-
-Y así se ve la tabla `matches` con datos reales, una celda por puntuación
-almacenada:
-
-![Mapa de calor de las 108 puntuaciones almacenadas, 18 candidatos por 6 ofertas](docs/bd_datos.png)
-
-Vale la pena mirarla dos veces. **Los máximos por columna caen donde deben** en
-cinco de las seis ofertas. La excepción es `data engineer`, donde el máximo es la
-ingeniera *junior* — porque esta tabla guarda el **coseno puro**, sin corregir, y
-ese es exactamente el caso que arregla el filtro de requisitos. Y las filas
-enteras encendidas o apagadas son el efecto centroide en crudo: el brillo de una
-fila mide cuánto se parece ese CV a todo, no a algo.
-
 ---
 
-## Capturas
+## Stack
 
-![La vitrina mostrando el ranking para la oferta de data engineer](docs/streamlit_ranking.png)
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.13-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/sentence--transformers-5.7-FFD21E?style=flat-square&logo=huggingface&logoColor=black)
+![NumPy](https://img.shields.io/badge/NumPy-2.2-013243?style=flat-square&logo=numpy&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.61-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-2.8-EA4B71?style=flat-square&logo=n8n&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-61%20tests-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
 
-La oferta pide tres años de experiencia. **Elena Cortés gana por similitud pura**
-—su CV va exactamente del tema— pero tiene dos años, así que queda segunda y el
-motivo aparece bajo su nombre. Kwame Osei, el data engineer con la experiencia
-que se pide, pasa al primer puesto. Debajo, CV1 baja hasta el séptimo por la
-misma razón.
+| Área | Tecnología | Para qué, y por qué esa |
+|---|---|---|
+| **NLP / embeddings** | `sentence-transformers` 5.7 sobre PyTorch 2.13, modelo `paraphrase-multilingual-MiniLM-L12-v2` | Convierte CVs y ofertas en vectores de 384 dimensiones. **Multilingüe a propósito**: los CVs mezclan español e inglés, y un modelo solo-inglés no alinea el espacio semántico entre idiomas |
+| **Cálculo numérico** | NumPy 2.2 | Similitud coseno **escrita a mano**, no una caja negra de scikit-learn: el objetivo era poder explicar la fórmula |
+| **Extracción de PDF** | `pdfplumber` 0.11 | Texto limpio de CVs con columnas y tablas. Descartado PyPDF2, que falla con esa maquetación |
+| **Base de datos** | MySQL 8.0 en Docker, `mysql-connector-python` | Persistencia de candidatos, puestos y matches. El vector va serializado en JSON y la comparación se hace en Python — **MySQL no tiene tipo vector nativo**, y elegirlo en vez de una vector DB fue una decisión de escala, no desconocimiento |
+| **API** | FastAPI 0.141, Uvicorn, Pydantic 2.13 | Capa HTTP entre la orquestación y los scripts. Servicio permanente: cargar el modelo tarda segundos y así se paga una sola vez |
+| **Orquestación** | n8n 2.8 | Dos flujos con webhook: alta de candidato y ranking. Los nodos **llaman a la API, no reimplementan lógica** |
+| **Interfaz** | Streamlit 1.61 | Vitrina del ranking, con CSS propio y el ángulo del coseno dibujado |
+| **Pruebas** | pytest 9.1 — **61 pruebas en 6 s** | Cubren el extractor de requisitos. Corren sin base de datos ni modelo cargado, que es la razón de que ese módulo viva aislado |
+| **Infraestructura** | Docker Compose | MySQL reproducible, sin instalar nada en el sistema |
+| **Utilidades** | ReportLab | Generación de los 16 CVs ficticios que sirven de conjunto de prueba, con perfiles de distintas familias y dos controles negativos |
 
-El ángulo dibujado a la izquierda no es decoración: **θ = arccos(afinidad)** es
-literalmente lo que calcula `match.py`. La regla capilar de cada fila mide la
-puntuación en escala absoluta 0-1, sin normalizar al máximo de la lista, porque
-normalizar exageraría diferencias que en la zona media son ruido.
-
-### Los dos flujos de n8n
-
-**Flujo A — alta de candidato.** Un webhook recibe un PDF, la API lo extrae,
-lo embebe y lo guarda, y el tercer nodo responde.
-
-![Flujo A en n8n: Webhook CV, API alta candidato y Responder alta](docs/n8n_flujo_a.png)
-
-**Flujo B — ranking.** Un webhook recibe el texto de una oferta y devuelve el
-ranking ya calculado como respuesta HTTP.
-
-![Flujo B en n8n: Webhook Oferta, API match y Responder ranking](docs/n8n_flujo_b.png)
-
-Los dos tienen la misma forma a propósito, y esa es la idea: **n8n no
-reimplementa nada**. El nodo central es una llamada HTTP a `api.py`, que importa
-las funciones ya probadas del pipeline. Si se borran `api.py` y `n8n/`, el
-proyecto sigue funcionando entero por terminal.
-
+Lo que **no** hay, también a propósito: sin cloud, sin APIs de embeddings de pago,
+sin vector database y sin scraping de portales de empleo. Cada descarte está
+razonado en [Decisiones y por qué](#decisiones-y-por-qué).
