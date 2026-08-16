@@ -16,3 +16,6 @@ requests
 
 # Solo para generar los CVs ficticios de demo, no lo usa el pipeline
 reportlab
+
+# Pruebas del extractor de requisitos. No lo usa el pipeline en ejecucion.
+pytest
