@@ -11,6 +11,7 @@ practicamente el mismo vector. La cantidad hay que leerla aparte.
 
 from __future__ import annotations
 
+import datetime
 import re
 import unicodedata
 
@@ -246,3 +247,116 @@ def titulacion_de_cv(texto: str) -> int | None:
 def titulacion_de_oferta(texto: str) -> int | None:
     """Titulacion EXIGIDA por la oferta, de su seccion de requisitos."""
     return _nivel_titulacion(secciones_oferta(texto)["requisitos"])
+
+
+# ---------------------------------------------------------------------------
+# Anios de experiencia
+# ---------------------------------------------------------------------------
+
+_NUMEROS_EN_LETRA: dict[str, int] = {
+    "un": 1, "uno": 1, "una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5,
+    "seis": 6, "siete": 7, "ocho": 8, "nueve": 9, "diez": 10,
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+}
+
+_HASTA_HOY = r"actualidad|actual|presente|hoy|present|now|current"
+
+# Rango de anios: '2019-2024', '2021 - actualidad', '(2018-2019)'.
+_RANGO = re.compile(
+    r"\b(19[89]\d|20[0-4]\d)\s*[-–—/]\s*(19[89]\d|20[0-4]\d|" + _HASTA_HOY + r")\b"
+)
+
+
+def _unir_intervalos(intervalos: list[tuple[int, int]]) -> int:
+    """Anios cubiertos por la union de los intervalos, sin contar solapes.
+
+    Sumar cada intervalo por separado inflaria el total: en un CV el anio de
+    salida de un empleo suele ser el mismo que el de entrada del siguiente, y
+    ese anio se contaria dos veces.
+    """
+    if not intervalos:
+        return 0
+
+    ordenados = sorted(intervalos)
+    fusionados = [ordenados[0]]
+    for inicio, fin in ordenados[1:]:
+        ultimo_inicio, ultimo_fin = fusionados[-1]
+        if inicio <= ultimo_fin:
+            fusionados[-1] = (ultimo_inicio, max(ultimo_fin, fin))
+        else:
+            fusionados.append((inicio, fin))
+
+    return sum(fin - inicio for inicio, fin in fusionados)
+
+
+def _anios_por_rangos(texto: str) -> int | None:
+    """Anios cubiertos por los rangos de fechas del texto, o None si no hay."""
+    anio_actual = datetime.date.today().year
+
+    intervalos = []
+    for encaje in _RANGO.finditer(_normalizar(texto)):
+        inicio = int(encaje.group(1))
+        fin_bruto = encaje.group(2)
+        fin = anio_actual if not fin_bruto.isdigit() else int(fin_bruto)
+        if fin >= inicio:
+            intervalos.append((inicio, fin))
+
+    if not intervalos:
+        return None
+    return _unir_intervalos(intervalos)
+
+
+# Frase explicita: el numero debe ir seguido de 'de experiencia' o de un
+# gerundio. Sin esa exigencia, 'un monolito de siete anos' daria siete anios de
+# experiencia a quien tiene ocho, y por un motivo que no habla del candidato
+# sino del sistema que migro. Es un caso real del CV de Ana Ruiz.
+_FRASE_ANIOS = re.compile(
+    r"\b(\d{1,2}|" + "|".join(_NUMEROS_EN_LETRA) + r")\s*\+?\s*a[nñ]os?\s+"
+    r"(?:de\s+experiencia|\w+ando|\w+iendo|of\s+experience)"
+    r"|\b(\d{1,2}|" + "|".join(_NUMEROS_EN_LETRA) + r")\s*\+?\s*years?\s+of\s+experience"
+)
+
+
+def _anios_por_frase(texto: str) -> int | None:
+    """Anios declarados en una frase explicita, o None si no la hay."""
+    encaje = _FRASE_ANIOS.search(_normalizar(texto))
+    if not encaje:
+        return None
+
+    bruto = next(g for g in encaje.groups() if g)
+    return int(bruto) if bruto.isdigit() else _NUMEROS_EN_LETRA[bruto]
+
+
+def anios_de_cv(texto: str) -> int | None:
+    """Anios de experiencia del candidato.
+
+    Orden estricto y deliberado:
+
+    1. Rangos de fechas de la seccion de EXPERIENCIA. Es la via principal
+       porque es la unica objetiva: son datos, no una afirmacion del candidato.
+    2. Solo si no hay ningun rango, una frase explicita, buscada en el CV
+       entero porque suele estar en el titular o en el perfil.
+
+    Invertir el orden seria un error medible: el CV de Ana Ruiz menciona 'un
+    monolito de siete anos' dentro de su experiencia, y una busqueda de frases
+    que fuese primero le asignaria siete anios en vez de los ocho que suman sus
+    rangos.
+    """
+    secciones = secciones_cv(texto)
+
+    por_rangos = _anios_por_rangos(secciones["experiencia"])
+    if por_rangos:
+        return por_rangos
+
+    return _anios_por_frase(texto)
+
+
+def anios_de_oferta(texto: str) -> int | None:
+    """Anios de experiencia EXIGIDOS, de la seccion de requisitos de la oferta.
+
+    Solo la via de la frase explicita: una oferta no lleva rangos de fechas, y
+    lo que se busca es un minimo declarado ('minimo 5 anos', 'al menos tres
+    anos', '3+ anos', 'at least 3 years').
+    """
+    return _anios_por_frase(secciones_oferta(texto)["requisitos"])
