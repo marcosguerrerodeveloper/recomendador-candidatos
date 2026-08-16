@@ -1,0 +1,18 @@
+pdfplumber
+sentence-transformers
+mysql-connector-python
+numpy
+python-dotenv
+
+# Capa HTTP del paso 6, la que consume n8n
+fastapi
+uvicorn
+python-multipart
+
+# Vitrina visual del paso 7. El extra [pdf] trae el visor de PDF que usa
+# st.pdf(): sin el, la funcion existe pero falla en ejecucion.
+streamlit[pdf]
+requests
+
+# Solo para generar los CVs ficticios de demo, no lo usa el pipeline
+reportlab

@@ -1,0 +1,21 @@
+Desarrollador/a Frontend con React
+
+Estamos rehaciendo el panel de operaciones con el que trabajan a diario los
+equipos de nuestras ciudades, y necesitamos a alguien que se haga cargo de la
+capa de interfaz de principio a fin.
+
+El trabajo no es solo maquetar pantallas. Buscamos a una persona que piense en
+componentes reutilizables, que mantenga vivo nuestro design system y que
+defienda la accesibilidad y el rendimiento en navegador cuando toque discutir
+prioridades con producto.
+
+La aplicacion esta construida en React con TypeScript, gestion de estado con
+Redux y empaquetado con Vite. Documentamos los componentes en Storybook y
+escribimos pruebas con Jest y Testing Library. La capa visual se apoya en CSS
+moderno y utilidades tipo Tailwind, y trabajamos codo con codo con diseno
+sobre Figma.
+
+Nos importa que sepas medir lo que haces: seguimos de cerca las Core Web
+Vitals y esperamos que las mejoras se noten en los numeros, no solo en la
+sensacion. Ofrecemos horario flexible, formato hibrido y presupuesto anual de
+formacion.

@@ -1,0 +1,38 @@
+[server]
+address = "127.0.0.1"
+port = 8501
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+# Dossier de tinta: fondo azul-negro por capas, texto en blanco cálido y latón
+# apagado como único acento. El latón viene del mundo del sujeto —placas,
+# plumas, señalética institucional— y evita el verde ácido y el terracota que
+# arrastran todos los paneles generados por defecto.
+[theme]
+base = "dark"
+primaryColor = "#C9A227"
+backgroundColor = "#10141B"
+secondaryBackgroundColor = "#171C26"
+textColor = "#E8E6E1"
+borderColor = "#242C3A"
+linkColor = "#C9A227"
+
+font = "IBM Plex Sans, -apple-system, Segoe UI, sans-serif"
+headingFont = "Source Serif 4, Georgia, serif"
+codeFont = "IBM Plex Mono, Consolas, monospace"
+
+baseRadius = "0.15rem"
+buttonRadius = "0.15rem"
+showWidgetBorder = true
+showSidebarBorder = true
+
+# La barra lateral NO hereda los colores de arriba: Streamlit le da su propia
+# superficie y, sin estas claves, sale en claro sobre un cuerpo oscuro.
+[theme.sidebar]
+backgroundColor = "#0C1016"
+secondaryBackgroundColor = "#171C26"
+textColor = "#E8E6E1"
+borderColor = "#242C3A"
+primaryColor = "#C9A227"

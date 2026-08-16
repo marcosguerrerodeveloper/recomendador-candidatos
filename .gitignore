@@ -1,0 +1,31 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.cache/
+
+# Los CVs reales NO se publican: llevan nombre, telefono y correo, y uno es
+# de un tercero. Se ignora por defecto cualquier PDF de cvs/ y se listan una
+# a una las excepciones, que son los perfiles ficticios generados por
+# generar_cvs_ficticios.py y hacen reproducible el ranking del README.
+#
+# La lista es explicita a proposito: ignorar por defecto y permitir a mano es
+# lo unico que garantiza que un CV real nuevo no acabe publicado por olvido.
+# Al anadir un perfil ficticio hay que anadirlo tambien aqui.
+cvs/*.pdf
+!cvs/ana_ruiz_backend.pdf
+!cvs/marc_soler_datascience.pdf
+!cvs/lucia_fernandez_frontend.pdf
+!cvs/david_ortega_devops.pdf
+!cvs/beatriz_nogales_rrhh.pdf
+!cvs/kwame_osei_data_engineer.pdf
+!cvs/sergio_ibanez_fullstack.pdf
+!cvs/nadia_belkacem_ml_engineer.pdf
+!cvs/pablo_arriaga_android.pdf
+!cvs/irene_vidal_qa.pdf
+!cvs/tomas_bravo_ciberseguridad.pdf
+!cvs/sofia_marchetti_producto.pdf
+!cvs/hugo_delgado_analista_bi.pdf
+!cvs/priya_raghunathan_cloud.pdf
+!cvs/elena_cortes_data_junior.pdf
+!cvs/javier_montes_contabilidad.pdf
