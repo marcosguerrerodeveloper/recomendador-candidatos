@@ -10,6 +10,38 @@ similitud. Sin APIs de pago ni servicios cloud.
 
 ---
 
+## Stack
+
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.13-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/sentence--transformers-5.7-FFD21E?style=flat-square&logo=huggingface&logoColor=black)
+![NumPy](https://img.shields.io/badge/NumPy-2.2-013243?style=flat-square&logo=numpy&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.61-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-2.8-EA4B71?style=flat-square&logo=n8n&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-61%20tests-0A9EDC?style=flat-square&logo=pytest&logoColor=white)
+
+| Área | Tecnología | Para qué, y por qué esa |
+|---|---|---|
+| **NLP / embeddings** | `sentence-transformers` 5.7 sobre PyTorch 2.13, modelo `paraphrase-multilingual-MiniLM-L12-v2` | Convierte CVs y ofertas en vectores de 384 dimensiones. **Multilingüe a propósito**: los CVs mezclan español e inglés, y un modelo solo-inglés no alinea el espacio semántico entre idiomas |
+| **Cálculo numérico** | NumPy 2.2 | Similitud coseno **escrita a mano**, no una caja negra de scikit-learn: el objetivo era poder explicar la fórmula |
+| **Extracción de PDF** | `pdfplumber` 0.11 | Texto limpio de CVs con columnas y tablas. Descartado PyPDF2, que falla con esa maquetación |
+| **Base de datos** | MySQL 8.0 en Docker, `mysql-connector-python` | Persistencia de candidatos, puestos y matches. El vector va serializado en JSON y la comparación se hace en Python — **MySQL no tiene tipo vector nativo**, y elegirlo en vez de una vector DB fue una decisión de escala, no desconocimiento |
+| **API** | FastAPI 0.141, Uvicorn, Pydantic 2.13 | Capa HTTP entre la orquestación y los scripts. Servicio permanente: cargar el modelo tarda segundos y así se paga una sola vez |
+| **Orquestación** | n8n 2.8 | Dos flujos con webhook: alta de candidato y ranking. Los nodos **llaman a la API, no reimplementan lógica** |
+| **Interfaz** | Streamlit 1.61 | Vitrina del ranking, con CSS propio y el ángulo del coseno dibujado |
+| **Pruebas** | pytest 9.1 — **61 pruebas en 6 s** | Cubren el extractor de requisitos. Corren sin base de datos ni modelo cargado, que es la razón de que ese módulo viva aislado |
+| **Infraestructura** | Docker Compose | MySQL reproducible, sin instalar nada en el sistema |
+| **Utilidades** | ReportLab, Playwright | Generación de los 16 CVs ficticios de demo y captura automatizada de las imágenes de este README |
+
+Lo que **no** hay, también a propósito: sin cloud, sin APIs de embeddings de pago,
+sin vector database y sin scraping de portales de empleo. Cada descarte está
+razonado en [Decisiones y por qué](#decisiones-y-por-qué).
+
+---
+
 ## Resultado de ejemplo
 
 Dieciocho candidatos frente a seis ofertas redactadas con el formato y el nivel
