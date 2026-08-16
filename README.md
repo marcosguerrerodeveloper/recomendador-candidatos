@@ -502,14 +502,20 @@ literalmente lo que calcula `match.py`. La regla capilar de cada fila mide la
 puntuación en escala absoluta 0-1, sin normalizar al máximo de la lista, porque
 normalizar exageraría diferencias que en la zona media son ruido.
 
-Faltan las dos capturas de los flujos de n8n — ver [`docs/README.md`](docs/README.md).
-Requieren crear la cuenta de propietario del editor, que pide email y contraseña.
-Cuando estén, basta con descomentar este bloque:
+### Los dos flujos de n8n
 
-<!--
-| | |
-|---|---|
-| ![Flujo A en n8n](docs/n8n_flujo_a.png) | ![Flujo B en n8n](docs/n8n_flujo_b.png) |
-| Flujo A — alta de candidato | Flujo B — ranking |
--->
+**Flujo A — alta de candidato.** Un webhook recibe un PDF, la API lo extrae,
+lo embebe y lo guarda, y el tercer nodo responde.
+
+![Flujo A en n8n: Webhook CV, API alta candidato y Responder alta](docs/n8n_flujo_a.png)
+
+**Flujo B — ranking.** Un webhook recibe el texto de una oferta y devuelve el
+ranking ya calculado como respuesta HTTP.
+
+![Flujo B en n8n: Webhook Oferta, API match y Responder ranking](docs/n8n_flujo_b.png)
+
+Los dos tienen la misma forma a propósito, y esa es la idea: **n8n no
+reimplementa nada**. El nodo central es una llamada HTTP a `api.py`, que importa
+las funciones ya probadas del pipeline. Si se borran `api.py` y `n8n/`, el
+proyecto sigue funcionando entero por terminal.
 
