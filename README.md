@@ -12,36 +12,72 @@ similitud. Sin APIs de pago ni servicios cloud.
 
 ## Resultado de ejemplo
 
-Dieciocho candidatos frente a cuatro ofertas. Dieciséis son perfiles ficticios
-generados para la demo y sí están en el repositorio; los otros dos son CVs reales
-con datos personales y **quedan excluidos por `.gitignore`** — por eso aparecen
-aquí como `CV1` y `Evaristo CV`. Todos rondan los 2.500-3.500 caracteres, la
-longitud de un CV real de verdad.
+Dieciocho candidatos frente a seis ofertas redactadas con el formato y el nivel
+de detalle de una oferta real, requisitos incluidos. Dieciséis candidatos son
+perfiles ficticios generados para la demo y sí están en el repositorio; los otros
+dos son CVs reales con datos personales y **quedan excluidos por `.gitignore`** —
+por eso aparecen aquí como `CV1` y `Evaristo CV`. Todos rondan los 2.500-3.500
+caracteres, la longitud de un CV real de verdad.
 
-Los cinco primeros de cada oferta, sin tocar nada entre ejecuciones:
+Los cinco primeros de cada oferta, sin tocar nada entre ejecuciones. `cos` es la
+similitud coseno pura y `adj` la puntuación tras descontar los requisitos que el
+candidato no cumple:
 
-| # | Oferta backend Python | | Oferta data scientist NLP | |
-|---|---|---|---|---|
-| 1 | **Ana Ruiz** — Backend Python | `0.7856` | **Marc Soler** — Data Scientist | `0.7035` |
-| 2 | David Ortega — DevOps/SRE | `0.6221` | Nadia Belkacem — ML Engineer | `0.6988` |
-| 3 | Nadia Belkacem — ML Engineer | `0.6190` | Elena Cortés — Data Eng. junior | `0.6410` |
-| 4 | Kwame Osei — Data Engineer | `0.6136` | Sofía Marchetti — Product Designer | `0.6344` |
-| 5 | CV1 | `0.5912` | Hugo Delgado — Analista BI | `0.6265` |
+| # | Oferta backend Python sénior *(5 años, Grado, B2)* | `cos` | `adj` |
+|---|---|---|---|
+| 1 | **Ana Ruiz** — Backend Python | `0.8989` | `0.8989` |
+| 2 | Nadia Belkacem — ML Engineer | `0.7775` | `0.7775` |
+| 3 | Hugo Delgado — Analista BI | `0.7467` | `0.7467` |
+| 4 | Sofía Marchetti — Product Designer | `0.7457` | `0.7457` |
+| 5 | Kwame Osei — Data Engineer | `0.7271` | `0.7271` |
 
-| # | Oferta frontend React | | Oferta data engineer *(en inglés)* | |
-|---|---|---|---|---|
-| 1 | **Lucía Fernández** — Frontend | `0.7676` | **Kwame Osei** — Data Engineer | `0.7579` |
-| 2 | Sofía Marchetti — Product Designer | `0.7049` | Evaristo CV | `0.7429` |
-| 3 | CV1 | `0.6835` | Elena Cortés — Data Eng. junior | `0.7038` |
-| 4 | Ana Ruiz — Backend Python | `0.6732` | CV1 | `0.6911` |
-| 5 | Nadia Belkacem — ML Engineer | `0.6316` | Priya Raghunathan — Cloud | `0.5718` |
+| # | Oferta data engineer *(3 años, Grado)* | `cos` | `adj` |
+|---|---|---|---|
+| 1 | **Kwame Osei** — Data Engineer | `0.8154` | `0.8154` |
+| 2 | Elena Cortés — Data Eng. **junior** | `0.8289` | `0.7789` ↓ |
+| 3 | Nadia Belkacem — ML Engineer | `0.7723` | `0.7723` |
+| 4 | Evaristo CV | `0.7708` | `0.7708` |
+| 5 | Hugo Delgado — Analista BI | `0.7627` | `0.7627` |
 
-Cuatro lecturas de estas tablas:
+| # | Oferta data scientist NLP *(4 años, Máster, C1)* | `cos` | `adj` |
+|---|---|---|---|
+| 1 | **Marc Soler** — Data Scientist | `0.8104` | `0.8104` |
+| 2 | Nadia Belkacem — ML Engineer | `0.7967` | `0.7967` |
+| 3 | Sofía Marchetti — Product Designer | `0.7764` | `0.7764` |
+| 4 | Hugo Delgado — Analista BI | `0.7455` | `0.7155` ↓ |
+| 5 | Ana Ruiz — Backend Python | `0.7237` | `0.6837` ↓ |
 
-**Acierta el primero en las cuatro ofertas**, y con margen: el ganador saca entre
-`0.015` y `0.16` al segundo. El segundo puesto también es defendible en todas —
-un product designer detrás de una frontend, un ML engineer detrás de un data
-scientist, una data engineer junior detrás del sénior.
+| # | Oferta frontend React *(sin requisitos)* | `cos` | `adj` |
+|---|---|---|---|
+| 1 | **Lucía Fernández** — Frontend | `0.8273` | `0.8273` |
+| 2 | Sofía Marchetti — Product Designer | `0.7996` | `0.7996` |
+| 3 | Ana Ruiz — Backend Python | `0.7493` | `0.7493` |
+| 4 | Nadia Belkacem — ML Engineer | `0.7472` | `0.7472` |
+| 5 | CV1 | `0.7061` | `0.7061` |
+
+| # | Oferta ML engineer *(en inglés; 3 años, Grado, C1)* | `cos` | `adj` |
+|---|---|---|---|
+| 1 | **Nadia Belkacem** — ML Engineer | `0.7523` | `0.7523` |
+| 2 | Ana Ruiz — Backend Python | `0.6732` | `0.6732` |
+| 3 | Kwame Osei — Data Engineer | `0.6713` | `0.6713` |
+| 4 | Priya Raghunathan — Cloud Architect | `0.6204` | `0.6204` |
+| 5 | Sofía Marchetti — Product Designer | `0.6070` | `0.6070` |
+
+Cinco lecturas de estas tablas:
+
+**Acierta el primero en las seis ofertas.** El ganador es en todos los casos el
+perfil de la familia correcta, y el segundo puesto también es defendible — un
+product designer detrás de una frontend, un ML engineer detrás de un data
+scientist.
+
+**El caso que justifica todo el filtro es el segundo.** Frente a la oferta de
+data engineer, quien gana por similitud coseno **no es el data engineer**: es
+Elena Cortés, la ingeniera de datos *junior*, con `0.8289` frente a los `0.8154`
+de Kwame Osei. Y es un resultado correcto desde el punto de vista semántico —
+su CV va exactamente del tema. Lo que el coseno no puede ver es que la oferta
+pide tres años y ella tiene dos, porque en el espacio de los embeddings «dos
+años» y «tres años» apuntan casi al mismo sitio. El descuento de `0.05` la deja
+segunda y explica por qué: *«pide 3 años de experiencia, se le calculan 2»*.
 
 **Distingue familias que se solapan.** El conjunto incluye a propósito data
 engineer, data analyst, data scientist y ML engineer, que comparten vocabulario.
@@ -49,9 +85,10 @@ Aun así, la oferta de NLP pone arriba al data scientist y al ML engineer, y la 
 plataforma de datos al data engineer y a la junior del mismo campo. No está
 agrupando por "temática de datos", está separando dentro de ella.
 
-**El cruce de idiomas funciona.** La cuarta oferta está en inglés y los CVs en
-español compiten de tú a tú: el ganador es un CV en inglés, pero el segundo y el
-tercero están en español.
+**El cruce de idiomas funciona.** La quinta oferta está escrita en inglés,
+requisitos incluidos (`At least 3 years`, `Bachelor's degree`), y los CVs en
+español compiten de tú a tú: gana un CV en inglés, pero el segundo y el tercero
+están en español. El extractor de requisitos también entiende las dos formas.
 
 **Dice por qué encaja, no solo cuánto.** Cada CV se guarda además troceado en
 fragmentos, y el sistema señala cuál de ellos es el más afín a la oferta. El
@@ -59,15 +96,102 @@ ranking muestra ese extracto junto al primer candidato, así que se puede
 comprobar el resultado en dos segundos en lugar de creerse el número. El
 fragmento no interviene en la puntuación — ver más abajo por qué.
 
-**Y el punto débil, que se deja a la vista.** Frente a la oferta de backend, la
-técnica de RRHH queda 14ª de 18, por delante de un desarrollador full stack
-(13º). Un perfil no técnico no debería adelantar a un programador. La causa está
-explicada abajo: promediar fragmentos empuja todo documento largo hacia el centro
-del espacio semántico, y en la zona media de la tabla las diferencias se
-comprimen hasta volverse ruido. El primer puesto es fiable; el puesto once no lo
-es. El otro control negativo, el contable, sí queda último en las cuatro.
+**Y el punto débil, que se deja a la vista.** Sofía Marchetti, product designer,
+se cuela en el tercer y cuarto puesto de varias ofertas puramente técnicas. Su CV
+habla de producto, usuarios, accesibilidad e iteración, vocabulario que aparece
+en casi cualquier oferta de software. La causa está explicada abajo: promediar
+fragmentos empuja todo documento largo hacia el centro del espacio semántico, y
+en la zona media de la tabla las diferencias se comprimen hasta volverse ruido.
+El primer puesto es fiable; el undécimo no lo es. El filtro de requisitos no
+arregla esto, porque el problema no es de idoneidad sino de resolución del
+coseno: ninguna de esas ofertas exige un requisito que ella incumpla.
 
 ---
+
+## El filtro de requisitos duros
+
+La similitud coseno mide **de qué va un CV**, no **si el candidato sirve**. En el
+espacio de los embeddings «un año de experiencia» y «ocho años» son vectores casi
+idénticos: los embeddings representan significado, no cantidad. Lo mismo pasa con
+la titulación exigida y con el nivel de idioma.
+
+Por eso, antes de ordenar, el sistema lee los requisitos que la oferta declara y
+lo que el CV acredita, y descuenta la diferencia:
+
+| Criterio | Penalización | Tope |
+|---|---|---|
+| Años de experiencia | `0.05` por año que falta | `0.20` |
+| Titulación | `0.04` por nivel que falta | `0.08` |
+| Nivel de inglés | `0.03` por nivel MCER que falta | `0.09` |
+
+Los años pesan más que los otros dos juntos, y es deliberado: son el requisito
+con el que de verdad se descarta. Las constantes están calibradas contra la
+escala real de puntuaciones de este corpus —donde la zona media se comprime por
+debajo de `0.02`— para que un requisito de experiencia mande sobre la afinidad
+temática y no al revés. Si se cambiara el modelo de embeddings habría que
+remedirlas.
+
+### Tres estados, no dos
+
+La decisión central del diseño es que un criterio tiene **tres** resultados
+posibles, no dos: *cumple*, *no cumple* y **no se sabe**. La extracción falla a
+veces, y confundir «no se pudo leer» con «no cumple» castigaría al candidato por
+un fallo del programa.
+
+- La oferta **no lo pide** → no se filtra por ese criterio.
+- El CV **no lo declara** → no se penaliza. El sistema calla en vez de inventar.
+- Ambos datos existen y el candidato se queda corto → penaliza, y **dice por
+  qué**: *«pide inglés C1, acredita B2»*.
+
+Se descartó excluir del ranking a quien no cumple. Borrar a alguien por un fallo
+de extracción es un error que nadie ve; bajarlo con el motivo escrito al lado es
+revisable en dos segundos.
+
+La puntuación original **no se modifica**: se añade una ajustada, y las dos
+viajan juntas hasta la interfaz. Con un único número ya corregido no se podría
+distinguir qué parte es afinidad semántica y qué parte es corrección por
+requisitos, que es justo lo que hace el ranking auditable.
+
+### Qué tal lee los CVs
+
+Sobre los 18 CVs indexados (`python medir_extractor.py`):
+
+| Criterio | Extraído | No declarado en el CV |
+|---|---|---|
+| Años de experiencia | 17 / 18 | 1 |
+| Titulación | 16 / 18 | 2 |
+| Nivel de inglés | 17 / 18 | 1 |
+
+Los años salen de **unir los rangos de fechas** de la sección de experiencia, no
+de sumarlos: `2018-2019`, `2019-2021` y `2021-2026` son ocho años, no diez,
+porque el año de salida de un empleo es el de entrada del siguiente. Y salen de
+la sección de experiencia y no del documento entero, porque el `(2014-2018)` de
+una carrera no son años trabajados.
+
+Solo si no hay ningún rango se recurre a frases del tipo «siete años
+gestionando». Ese orden importa: un CV del corpus menciona *«la migración de un
+monolito de siete años»*, y una búsqueda de frases que fuese primero le asignaría
+siete años de experiencia a quien tiene ocho, por un dato que no habla de ella
+sino del sistema que migró.
+
+### Qué mejora, medido
+
+El criterio es dónde caen los dos controles negativos —una técnica de RRHH y un
+contable sénior— que deberían hundirse frente a cualquier oferta técnica
+(`python medir_ranking.py`):
+
+| | Posición media de los controles (de 18) |
+|---|---|
+| Sin filtro | 15,42 |
+| **Con filtro** | **16,08** |
+
+La mejora es real pero modesta, y conviene ser preciso sobre por qué: los
+controles negativos ya estaban al fondo, así que quedaba poco margen. **Donde el
+filtro se nota de verdad es en la zona alta**, que es la que se mira: es lo que
+separa al data engineer sénior de la junior, y ese cambio no aparece en una media
+de posiciones.
+
+
 
 ## Cómo funciona
 
@@ -180,7 +304,24 @@ real llevaría un token por cabecera. Es una decisión consciente, no un olvido.
 
 ## Problemas reales que aparecieron
 
-Los tres se detectaron midiendo, no leyendo código.
+Todos se detectaron midiendo, no leyendo código.
+
+**Una oferta sin requisitos acabó exigiendo un Grado que nunca pidió.** De las
+seis ofertas, la de frontend no declara ningún requisito duro: está ahí como
+control, porque su ranking tiene que salir idéntico con filtro y sin él. No
+salió. El primer puesto cambió de la desarrolladora frontend a una product
+designer.
+
+La causa: `Qué ofrecemos` no estaba en la lista de cabeceras reconocidas, así que
+no **cerraba** la sección anterior. El texto de beneficios se quedaba dentro de
+los requisitos, y la frase *«un equipo de producto donde diseño e **ingeniería**
+deciden juntos»* disparaba el detector de titulación. La frontend, que tiene FP,
+pagaba `0.04` por una titulación imaginaria.
+
+Reconocer dónde **termina** una sección resultó ser tan importante como reconocer
+dónde empieza, y no es evidente hasta que muerde. La oferta de control se ganó el
+sitio ella sola: sin ella, el fallo habría pasado por «el ranking ha cambiado un
+poco, será el filtro haciendo su trabajo».
 
 **El modelo truncaba el 85% de cada CV en silencio.** MiniLM tiene una ventana de
 128 tokens y descarta lo que sobra sin lanzar ningún error. De un CV de tres
@@ -197,14 +338,35 @@ representativo) y devuelve el centroide.
 
 *Contrapartida honesta:* promediar convierte el documento en su centroide
 temático, así que un CV largo y transversal queda a media distancia de todo y
-puntúa medio-alto frente a cualquier oferta. Se ve en las tablas: CV1, que es el
-documento más largo del conjunto, aparece entre los seis primeros de las cuatro
-ofertas pese a no ser el mejor para ninguna.
+puntúa medio-alto frente a cualquier oferta. El caso claro es CV1, el documento
+más largo del conjunto: por similitud pura queda 2º, 3º, 2º y 6º en ofertas para
+las que no es el mejor candidato.
+
+**Y aquí el filtro de requisitos resultó arreglar más de lo que pretendía.** CV1
+acredita un año de experiencia, así que en cuanto una oferta pide varios se
+desploma:
+
+| Oferta | CV1 sin filtro | CV1 con filtro |
+|---|---|---|
+| Backend Python sénior *(5 años)* | 2º | **16º** |
+| ML engineer *(3 años)* | 2º | **11º** |
+| Data scientist NLP *(4 años)* | 6º | **13º** |
+| Data engineer *(3 años)* | 3º | **7º** |
+| Frontend React *(sin requisitos)* | 5º | 5º |
+| Software tools developer *(1 año)* | 1º | **1º** |
+
+Las dos últimas filas son las que dan sentido a las otras cuatro: donde la oferta
+no exige nada, CV1 no se mueve; y donde solo pide un año —que sí tiene— se queda
+primero. No es que el filtro castigue a los CVs largos, es que la amplitud
+temática de CV1 estaba **tapando** una experiencia corta que ninguna cantidad de
+similitud coseno podía ver. Es la limitación documentada más arriba, mitigada por
+un mecanismo que se diseñó para otra cosa.
 
 **La solución evidente se probó y era peor.** Si promediar diluye al
 especialista, lo lógico parece puntuar por el *mejor* fragmento: bastaría con que
-una parte del CV respondiera a la oferta. Se implementó y se midió sobre las
-cuatro ofertas y los dieciocho candidatos. Todas las variantes aciertan al
+una parte del CV respondiera a la oferta. Se implementó y se midió sobre los
+dieciocho candidatos y las cuatro ofertas de la primera versión, más cortas y sin
+requisitos que las seis actuales. Todas las variantes aciertan al
 ganador, así que el criterio decisivo es dónde caen los dos controles negativos,
 que deberían hundirse:
 
@@ -245,18 +407,29 @@ bytes crudos y se decodifican a mano.
 
 - **Los CVs largos y transversales puntúan alto contra todo.** Explicado arriba.
 - **La zona media del ranking no es fiable.** El primer puesto acierta en las
-  cuatro ofertas y con margen, pero entre los puestos 8 y 15 las diferencias caen
-  por debajo de `0.02` y el orden deja de significar nada: ahí es donde la
-  técnica de RRHH adelanta a un desarrollador full stack. Al alargar los CVs de
+  seis ofertas, pero entre los puestos 8 y 15 las diferencias caen por debajo de
+  `0.02` y el orden deja de significar nada. Al alargar los CVs de
   700 a 2.500 caracteres el primer puesto mejoró y la zona media empeoró, que es
   justo lo que predice el efecto centroide. Se descartaron dos explicaciones
   midiendo: no lo causa el texto genérico común a todos los CVs (al eliminarlo,
   el orden apenas se movió) y no lo arregla puntuar por el mejor fragmento (sale
   peor, ver la tabla de arriba).
-- **El ranking mide afinidad temática, no idoneidad.** No distingue tres años de
-  experiencia de diez, ni detecta que a un candidato le falta un requisito
-  obligatorio. Un filtro duro previo (años, titulación, disponibilidad) sería el
-  complemento natural.
+- **El extractor de requisitos es de expresiones regulares, no semántico.** Sabe
+  leer los formatos habituales (`mínimo 5 años`, `3+ años`, `at least 3 years`,
+  `Grado en...`, `inglés B2`) y segmenta por cabeceras a partir de una lista de
+  rótulos conocidos. Una oferta que titule sus apartados de forma inusual puede
+  colar texto en la sección equivocada — es exactamente el fallo que se cuenta
+  arriba. El error se degrada hacia el lado seguro: un requisito de menos
+  significa no filtrar, y uno de más queda a la vista porque el aviso se muestra.
+- **Solo se comparan tres criterios, y de la titulación solo el nivel.** Decidir
+  si un «Grado en Matemáticas» vale para una oferta que pide «Grado en
+  Informática» es un problema semántico, y para eso ya está el coseno: duplicarlo
+  con una lista de sinónimos daría un resultado peor y además invisible. Quedan
+  fuera la disponibilidad y la ubicación, que los CVs casi nunca declaran de
+  forma comparable.
+- **Los requisitos se releen en cada consulta**, no se guardan en la base de
+  datos. Con 18 candidatos son unas pocas expresiones regulares y no se nota; con
+  miles habría que precalcularlos al indexar.
 - **Sin OCR.** Un CV escaneado como imagen no da texto; el sistema lo detecta y
   lo rechaza con un mensaje claro en vez de indexar un candidato vacío.
 - **Streamlit no es desplegable tal cual en la nube.** La app consume la API
@@ -273,13 +446,22 @@ extract_text.py       Paso 1 · PDF -> texto limpio (pdfplumber)
 db_setup.py           Paso 2 · esquema MySQL y conexión reutilizable
 embed_and_store.py    Paso 3 · texto -> vector de 384 dims -> MySQL
 match.py              Paso 4 · coseno y ranking
+requisitos.py         texto -> años, titulación e inglés (sin dependencias)
 api.py                Paso 6 · capa HTTP (FastAPI) que consumen n8n y Streamlit
 app_streamlit.py      Paso 7 · vitrina visual
+tests/                61 pruebas del extractor de requisitos (pytest)
+medir_extractor.py    diagnóstico: qué lee el filtro de cada CV
+medir_ranking.py      diagnóstico: ranking con filtro y sin él
 n8n/                  flujos exportados + guía de orquestación
 cvs/                  CVs en PDF
-ofertas/              descripciones de puesto en .txt
+ofertas/              seis descripciones de puesto en .txt
 docs/                 capturas para este README
 ```
+
+`requisitos.py` no sabe nada de MySQL, de embeddings ni de la interfaz: convierte
+cadenas de texto en datos comparables y nada más. Por eso sus 61 pruebas corren
+en seis segundos sin levantar ningún servicio, y por eso está en un fichero
+aparte en lugar de dentro de `match.py`.
 
 **Esquema de datos:** `candidatos` (clave única por archivo), `puestos` (clave
 única por SHA-256 de la descripción) y `matches` (única por par candidato-puesto).
