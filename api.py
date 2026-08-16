@@ -261,7 +261,17 @@ def calcular_match(peticion: PeticionMatch) -> dict:
             {
                 "posicion": posicion,
                 "candidato": fila["nombre"],
+                # Los dos scores viajan juntos a proposito. 'score' es el coseno
+                # puro y 'score_ajustado' el que decide el orden: separarlos
+                # permite ver que parte de la puntuacion es afinidad semantica y
+                # que parte es correccion por requisitos no cumplidos. Con un
+                # unico numero ya corregido esa distincion se perderia.
                 "score": round(fila["score"], 4),
+                "score_ajustado": round(fila["score_ajustado"], 4),
+                "penalizacion": fila["penalizacion"],
+                # Por que ha bajado, en lenguaje legible. Lista vacia si cumple
+                # todo lo que la oferta exige, o si su CV no declara el dato.
+                "avisos": fila["avisos"],
                 # El trozo del CV mas afin a esta oferta. No interviene en la
                 # puntuacion: sirve para poder comprobar de un vistazo si el
                 # sistema tiene razon, en vez de tener que creerse el numero.

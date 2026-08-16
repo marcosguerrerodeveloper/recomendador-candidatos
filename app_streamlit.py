@@ -125,7 +125,19 @@ CSS = """
   font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--faint);
   font-variant-numeric: tabular-nums;
 }
-.fila .quien { color:var(--paper); font-size:.94rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fila .quien { color:var(--paper); font-size:.94rem; min-width:0; }
+.fila .quien .nombre-fila {
+  display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* El motivo por el que un candidato ha bajado. Va en laton atenuado y no en
+   rojo: no es un error del sistema ni una alarma, es una anotacion al margen
+   del libro mayor. Debe leerse si se busca y no gritar si no. */
+.aviso-requisito {
+  display:block; margin-top:.18rem;
+  font-family:'IBM Plex Sans',sans-serif; font-size:.72rem; line-height:1.35;
+  color:#8A7B4F; letter-spacing:.01em;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 /* La regla capilar mide el score en escala absoluta 0-1, sin normalizar al
    maximo de la lista: normalizar exageraria diferencias pequenas y haria
    parecer decisivo lo que no lo es. */
@@ -314,6 +326,21 @@ def escapar(texto: str) -> str:
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
+def aviso_de(fila: dict) -> str:
+    """Renglon con el motivo por el que un candidato ha bajado, o cadena vacia.
+
+    Devuelve cadena vacia en los dos casos en que el sistema no tiene nada que
+    decir: cuando el candidato cumple todo lo que la oferta exige, y cuando su
+    CV no declara el dato y por tanto no se le penaliza. Callar en el segundo
+    caso es deliberado: inventar un aviso donde no hay informacion daria al
+    silencio del parser la apariencia de un juicio sobre la persona.
+    """
+    avisos = fila.get("avisos") or []
+    if not avisos:
+        return ""
+    return f'<span class="aviso-requisito">{escapar(" · ".join(avisos))}</span>'
+
+
 # --------------------------------------------------------------------------
 salud = consultar_salud()
 
@@ -429,7 +456,7 @@ with evaluar:
   <div>{arco(lider["score"])}</div>
   <div>
     <div class="rotulo">Mejor alineamiento</div>
-    <div class="nombre">{escapar(lider["candidato"])}</div>
+    <div class="nombre">{escapar(lider["candidato"])}</div>{aviso_de(lider)}
     <div class="cifras">
       <div class="cifra"><span class="clave">Afinidad</span>
         <span class="valor acento">{lider["score"]:.4f}</span></div>
@@ -445,12 +472,19 @@ with evaluar:
                 )
 
                 if resto:
+                    # Se muestra el score AJUSTADO y no el coseno puro porque es
+                    # el que decide el orden: pintar el coseno dejaria filas con
+                    # una cifra mayor por debajo de otra menor, que se lee como
+                    # un fallo del programa. El motivo del descuento va debajo
+                    # del nombre, asi que la correccion queda a la vista y no
+                    # escondida dentro del numero.
                     filas = "".join(
                         f'<div class="fila">'
                         f'<span class="orden">{f["posicion"]:02d}</span>'
-                        f'<span class="quien">{escapar(f["candidato"])}</span>'
-                        f'<span class="regla"><i style="width:{max(f["score"],0)*100:.1f}%"></i></span>'
-                        f'<span class="marca">{f["score"]:.4f}</span>'
+                        f'<span class="quien"><span class="nombre-fila">'
+                        f'{escapar(f["candidato"])}</span>{aviso_de(f)}</span>'
+                        f'<span class="regla"><i style="width:{max(f["score_ajustado"],0)*100:.1f}%"></i></span>'
+                        f'<span class="marca">{f["score_ajustado"]:.4f}</span>'
                         f"</div>"
                         for f in resto
                     )
@@ -465,7 +499,15 @@ with evaluar:
                     "vector del puesto y el de cada CV. Mide <b>dirección, no "
                     "magnitud</b>: por eso un CV de tres páginas no gana a uno de "
                     "una sola por ser más largo. Lo que informa es el orden "
-                    "relativo, no la cifra absoluta.</p>",
+                    "relativo, no la cifra absoluta.</p>"
+                    "<p class='nota' style='border-top:none;margin-top:.6rem;"
+                    "padding-top:0'>Cuando la oferta declara un requisito duro "
+                    "—años de experiencia, titulación o nivel de inglés— quien "
+                    "no lo alcanza <b>baja</b>, y el motivo aparece bajo su "
+                    "nombre. Los embeddings no saben de cantidades: para ellos "
+                    "«un año» y «ocho años» apuntan casi al mismo sitio. Quien "
+                    "no declara el dato en su CV <b>no se penaliza</b>: un fallo "
+                    "de lectura no debe perjudicar a nadie.</p>",
                     unsafe_allow_html=True,
                 )
 
