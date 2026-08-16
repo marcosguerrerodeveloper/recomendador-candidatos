@@ -129,3 +129,69 @@ def _es_cabecera_oferta(linea: str) -> bool:
 def secciones_oferta(texto: str) -> dict[str, str]:
     """Parte una oferta en requisitos / valorado / otros."""
     return _segmentar(texto, _CABECERAS_OFERTA, _es_cabecera_oferta)
+
+
+# ---------------------------------------------------------------------------
+# Nivel de ingles
+# ---------------------------------------------------------------------------
+
+NIVELES_MCER: dict[str, int] = {
+    "a1": 1, "a2": 2, "b1": 3, "b2": 4, "c1": 5, "c2": 6,
+}
+
+# Expresiones sueltas que la gente escribe en vez del codigo del MCER. El mapeo
+# es conservador a proposito: "nivel alto" se traduce a C1 y no a C2 porque
+# quien tiene un C2 acreditado casi siempre lo escribe como C2.
+_EQUIVALENCIAS_MCER: dict[str, int] = {
+    "nativo": 6, "nativa": 6, "native": 6, "bilingue": 6, "bilingual": 6,
+    "nivel alto": 5, "fluido": 5, "fluida": 5, "fluent": 5, "avanzado": 5,
+}
+
+# El nivel debe ir pegado a la mencion del ingles, no suelto por la linea: un
+# CV que diga "Ingles C1. Frances B1." tiene que dar C1 y no B1. Se busca la
+# palabra 'ingles'/'english' y se mira solo en la ventana siguiente, cortando
+# en cuanto aparece otro idioma.
+_OTROS_IDIOMAS = r"frances|french|aleman|german|italiano|italian|portugues|portuguese|catalan|valenciano|espanol|spanish|chino|chinese"
+
+
+def _nivel_ingles(texto: str) -> int | None:
+    """Nivel de ingles mencionado en el texto, o None si no se menciona."""
+    plano = _normalizar(texto)
+
+    for encaje in re.finditer(r"\bingl[eé]s\b|\benglish\b", plano):
+        # Ventana desde la mencion del ingles hasta el siguiente idioma o el
+        # final de la frase, lo que llegue antes.
+        resto = plano[encaje.end():encaje.end() + 80]
+        corte = re.search(_OTROS_IDIOMAS, resto)
+        if corte:
+            resto = resto[:corte.start()]
+
+        codigo = re.search(r"\b([abc][12])\b", resto)
+        if codigo:
+            return NIVELES_MCER[codigo.group(1)]
+
+        for expresion, nivel in _EQUIVALENCIAS_MCER.items():
+            if expresion in resto:
+                return nivel
+
+    return None
+
+
+def ingles_de_cv(texto: str) -> int | None:
+    """Nivel de ingles que el candidato acredita, leido de su seccion IDIOMAS.
+
+    Se busca solo ahi y no en el CV entero para no confundir el nivel del
+    candidato con la mencion de un requisito o de una certificacion citada en
+    otro contexto.
+    """
+    return _nivel_ingles(secciones_cv(texto)["idiomas"])
+
+
+def ingles_de_oferta(texto: str) -> int | None:
+    """Nivel de ingles EXIGIDO por la oferta.
+
+    Solo cuenta lo que este bajo la seccion de requisitos. Lo que aparece bajo
+    'Se valorara' es un merito, no una condicion, y penalizar por ello seria
+    castigar a candidatos perfectamente validos.
+    """
+    return _nivel_ingles(secciones_oferta(texto)["requisitos"])
