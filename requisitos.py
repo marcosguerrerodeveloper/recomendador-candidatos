@@ -195,3 +195,54 @@ def ingles_de_oferta(texto: str) -> int | None:
     castigar a candidatos perfectamente validos.
     """
     return _nivel_ingles(secciones_oferta(texto)["requisitos"])
+
+
+# ---------------------------------------------------------------------------
+# Nivel de titulacion
+# ---------------------------------------------------------------------------
+
+# Se compara SOLO el nivel academico, nunca la rama. Decidir si un "Grado en
+# Matematicas" vale para una oferta que pide "Grado en Informatica" es un
+# problema semantico, y para eso ya esta el coseno: duplicarlo aqui con una
+# lista de sinonimos daria un resultado peor y ademas invisible.
+#
+# El orden importa. Se evalua de mayor a menor y "grado superior" va antes que
+# "grado" porque lo contiene: al reves, un Grado Superior de FP se leeria como
+# un Grado universitario y subiria un nivel que no tiene.
+_TITULACIONES: list[tuple[int, str]] = [
+    (3, r"\bm[aá]ster\b|\bmaster\b|\bmsc\b|\bmba\b|\bdoctorad|\bphd\b|\bdoctor\b"),
+    (1, r"\bgrado superior\b|\bciclo formativo de grado superior\b|\bfp\b|\bformaci[oó]n profesional\b"),
+    (2, r"\bgrado\b|\blicenciatur|\bingenier[ií]a t[eé]cnica\b|\bingenier[ií]a\b|\bbachelor\b|\bbsc\b|\bdegree\b"),
+]
+
+
+def _nivel_titulacion(texto: str) -> int | None:
+    """Titulacion mas alta mencionada en el texto, o None si no hay ninguna."""
+    plano = _normalizar(texto)
+
+    # 'Grado Superior' se neutraliza antes de buscar los niveles universitarios
+    # para que su palabra 'grado' no se cuente dos veces.
+    encontrados = []
+    if re.search(_TITULACIONES[1][1], plano):
+        encontrados.append(1)
+        plano = re.sub(r"\bgrado superior\b", " ", plano)
+    if re.search(_TITULACIONES[0][1], plano):
+        encontrados.append(3)
+    if re.search(_TITULACIONES[2][1], plano):
+        encontrados.append(2)
+
+    return max(encontrados) if encontrados else None
+
+
+def titulacion_de_cv(texto: str) -> int | None:
+    """Titulacion mas alta que el candidato acredita, de su seccion FORMACION.
+
+    Se toma el maximo y no la primera: lo relevante es el techo academico, y en
+    un CV el Master y el Grado que lo precede aparecen juntos.
+    """
+    return _nivel_titulacion(secciones_cv(texto)["formacion"])
+
+
+def titulacion_de_oferta(texto: str) -> int | None:
+    """Titulacion EXIGIDA por la oferta, de su seccion de requisitos."""
+    return _nivel_titulacion(secciones_oferta(texto)["requisitos"])
