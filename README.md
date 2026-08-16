@@ -471,15 +471,27 @@ Las tres claves hacen el pipeline idempotente: reprocesar no duplica nada.
 
 ## Capturas
 
-Pendientes: ver [`docs/README.md`](docs/README.md) para qué capturar y desde
-dónde. Una vez estén en `docs/`, basta con descomentar este bloque:
+![La vitrina mostrando el ranking para la oferta de data engineer](docs/streamlit_ranking.png)
+
+La oferta pide tres años de experiencia. **Elena Cortés gana por similitud pura**
+—su CV va exactamente del tema— pero tiene dos años, así que queda segunda y el
+motivo aparece bajo su nombre. Kwame Osei, el data engineer con la experiencia
+que se pide, pasa al primer puesto. Debajo, CV1 baja hasta el séptimo por la
+misma razón.
+
+El ángulo dibujado a la izquierda no es decoración: **θ = arccos(afinidad)** es
+literalmente lo que calcula `match.py`. La regla capilar de cada fila mide la
+puntuación en escala absoluta 0-1, sin normalizar al máximo de la lista, porque
+normalizar exageraría diferencias que en la zona media son ruido.
+
+Faltan las dos capturas de los flujos de n8n — ver [`docs/README.md`](docs/README.md).
+Requieren crear la cuenta de propietario del editor, que pide email y contraseña.
+Cuando estén, basta con descomentar este bloque:
 
 <!--
 | | |
 |---|---|
 | ![Flujo A en n8n](docs/n8n_flujo_a.png) | ![Flujo B en n8n](docs/n8n_flujo_b.png) |
 | Flujo A — alta de candidato | Flujo B — ranking |
-
-![Vitrina en Streamlit](docs/streamlit_ranking.png)
 -->
 
