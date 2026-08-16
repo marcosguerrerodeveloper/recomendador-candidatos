@@ -266,6 +266,24 @@ npx -y n8n
 
 Detalles de n8n (importar flujos, publicar, webhooks): [`n8n/README.md`](n8n/README.md).
 
+### Pruebas y diagnóstico
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/ -v   # 61 pruebas, ~6 s
+```
+
+No necesitan MySQL, ni el modelo cargado, ni ningún servicio: cubren
+`requisitos.py`, que es texto entrando y datos saliendo. Esa es la razón de que
+viva en un fichero aparte.
+
+Los dos scripts de diagnóstico reproducen las cifras de este README, para que se
+puedan comprobar en vez de creerlas:
+
+```powershell
+.\.venv\Scripts\python.exe medir_extractor.py   # qué lee el filtro de cada CV
+.\.venv\Scripts\python.exe medir_ranking.py     # ranking con filtro y sin él
+```
+
 ---
 
 ## Decisiones y por qué

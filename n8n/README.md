@@ -42,9 +42,53 @@ curl -X POST http://127.0.0.1:5678/webhook/candidato -F "archivo=@cv.pdf"
 ```bash
 curl -X POST http://127.0.0.1:5678/webhook/match \
   -H "Content-Type: application/json" \
-  -d '{"texto":"Desarrollador backend con Python y MySQL...","top":3}'
-# [{"titulo":"...","total_candidatos":3,"ranking":[{"posicion":1,"candidato":"Ana Ruiz Backend","score":0.7383}, ...]}]
+  -d '{"texto":"Data Engineer. Requisitos: al menos 3 anos de experiencia...","top":2}'
 ```
+
+Respuesta (recortada):
+
+```json
+[{
+  "titulo": "...",
+  "total_candidatos": 2,
+  "ranking": [
+    {
+      "posicion": 1,
+      "candidato": "Kwame Osei - Data Engineer",
+      "score": 0.8154,
+      "score_ajustado": 0.8154,
+      "penalizacion": 0.0,
+      "avisos": [],
+      "extracto": "SQL, Apache Airflow, dbt, Apache Spark, Kafka..."
+    },
+    {
+      "posicion": 2,
+      "candidato": "Elena Cortés Rubio - Ingeniera de Datos Junior",
+      "score": 0.8289,
+      "score_ajustado": 0.7789,
+      "penalizacion": 0.05,
+      "avisos": ["pide 3 años de experiencia, se le calculan 2"],
+      "extracto": "..."
+    }
+  ]
+}]
+```
+
+Fíjate en el segundo candidato: tiene **más** `score` que el primero y aun así va
+detrás. El orden lo decide `score_ajustado`, no el coseno. Si consumes esta
+respuesta desde otro nodo, **ordena por `score_ajustado`** o respeta el campo
+`posicion`; usar `score` reordenaría el ranking y descartaría el filtro de
+requisitos.
+
+Los campos son:
+
+| Campo | Qué es |
+|---|---|
+| `score` | similitud coseno pura, entre 0 y 1 |
+| `score_ajustado` | `score` menos la penalización. **Es el que ordena** |
+| `penalizacion` | cuánto se ha descontado por requisitos no cumplidos |
+| `avisos` | por qué, en texto legible. Lista vacía si cumple o si su CV no lo declara |
+| `extracto` | el fragmento del CV más afín a la oferta. No interviene en la puntuación |
 
 Campos aceptados por el Flujo B: `texto` (obligatorio), `titulo`, `top`,
 `guardar` (a `false` para probar sin escribir en la base de datos).
