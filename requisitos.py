@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import datetime
 import re
+from dataclasses import dataclass, field
 import unicodedata
 
 # ---------------------------------------------------------------------------
@@ -360,3 +361,111 @@ def anios_de_oferta(texto: str) -> int | None:
     anos', '3+ anos', 'at least 3 years').
     """
     return _anios_por_frase(secciones_oferta(texto)["requisitos"])
+
+
+# ---------------------------------------------------------------------------
+# Ensamblaje
+# ---------------------------------------------------------------------------
+
+# Cuanto baja el score por cada unidad que falta, y hasta donde puede llegar.
+#
+# CALIBRADAS CONTRA LA ESCALA REAL DE SCORES DE ESTE CORPUS: la distancia entre
+# el primero y el segundo va de 0,015 a 0,16, y en la zona media del ranking
+# baja de 0,02. Los anios se ponen A PROPOSITO por encima de esa escala para
+# que un requisito de experiencia mande sobre la afinidad tematica: faltando un
+# solo anio, 0,05 ya supera cualquier diferencia de la zona media.
+#
+# El efecto asumido es que la experiencia domina sobre los otros dos criterios.
+# Es una decision de producto, no una propiedad emergente de los numeros.
+#
+# SI SE CAMBIA EL MODELO DE EMBEDDINGS HAY QUE REMEDIRLAS: otra escala de
+# scores convierte estas constantes en ruido o en una apisonadora.
+PENALIZACIONES: dict[str, tuple[float, float]] = {
+    # criterio:      (por unidad, tope)
+    "anios":         (0.05, 0.20),
+    "titulacion":    (0.04, 0.08),
+    "ingles":        (0.03, 0.09),
+}
+
+_NOMBRE_MCER = {nivel: codigo.upper() for codigo, nivel in NIVELES_MCER.items()}
+_NOMBRE_TITULACION = {1: "FP o Grado Superior", 2: "Grado", 3: "Máster"}
+
+
+@dataclass(frozen=True)
+class Requisitos:
+    """Lo que la oferta EXIGE. None = no lo pide, asi que no se filtra por el."""
+
+    anios: int | None = None
+    titulacion: int | None = None
+    ingles: int | None = None
+
+
+@dataclass(frozen=True)
+class Perfil:
+    """Lo que el candidato ACREDITA. None = no se pudo extraer, NO es cero."""
+
+    anios: int | None = None
+    titulacion: int | None = None
+    ingles: int | None = None
+
+
+@dataclass(frozen=True)
+class Veredicto:
+    """Cuanto baja el candidato y por que, en lenguaje legible."""
+
+    penalizacion: float = 0.0
+    avisos: list[str] = field(default_factory=list)
+
+
+def extraer_de_oferta(texto: str) -> Requisitos:
+    """Requisitos duros que la oferta declara de forma explicita."""
+    return Requisitos(
+        anios=anios_de_oferta(texto),
+        titulacion=titulacion_de_oferta(texto),
+        ingles=ingles_de_oferta(texto),
+    )
+
+
+def extraer_de_cv(texto: str) -> Perfil:
+    """Lo que el CV acredita en los tres criterios del filtro."""
+    return Perfil(
+        anios=anios_de_cv(texto),
+        titulacion=titulacion_de_cv(texto),
+        ingles=ingles_de_cv(texto),
+    )
+
+
+def evaluar(requisitos: Requisitos, perfil: Perfil) -> Veredicto:
+    """Penalizacion y avisos de un candidato frente a una oferta.
+
+    Un criterio solo penaliza cuando se dan las dos condiciones a la vez: la
+    oferta lo exige Y el CV acredita menos. Si la oferta no lo pide, o si el
+    dato del candidato no se pudo extraer, no pasa nada. Esa asimetria es
+    deliberada: el sistema calla en lugar de inventar, porque un descarte por
+    fallo del parser seria un error que nadie ve.
+
+    La penalizacion es proporcional a la distancia y no binaria. Un umbral de
+    si o no trataria igual a quien tiene cuatro anios y a quien tiene uno
+    frente a una oferta que pide cinco, y eso es falso.
+    """
+    penalizacion = 0.0
+    avisos: list[str] = []
+
+    comparaciones = [
+        ("anios", requisitos.anios, perfil.anios,
+         lambda pide, tiene: f"pide {pide} años de experiencia, se le calculan {tiene}"),
+        ("titulacion", requisitos.titulacion, perfil.titulacion,
+         lambda pide, tiene: f"pide {_NOMBRE_TITULACION[pide]}, acredita {_NOMBRE_TITULACION.get(tiene, 'ninguna titulación')}"),
+        ("ingles", requisitos.ingles, perfil.ingles,
+         lambda pide, tiene: f"pide inglés {_NOMBRE_MCER[pide]}, acredita {_NOMBRE_MCER[tiene]}"),
+    ]
+
+    for criterio, exigido, acreditado, redactar in comparaciones:
+        if exigido is None or acreditado is None or acreditado >= exigido:
+            continue
+
+        por_unidad, tope = PENALIZACIONES[criterio]
+        penalizacion += min((exigido - acreditado) * por_unidad, tope)
+        avisos.append(redactar(exigido, acreditado))
+
+    return Veredicto(penalizacion=round(penalizacion, 4), avisos=avisos)
