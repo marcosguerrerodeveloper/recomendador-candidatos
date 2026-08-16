@@ -513,9 +513,31 @@ cadenas de texto en datos comparables y nada más. Por eso sus 61 pruebas corren
 en seis segundos sin levantar ningún servicio, y por eso está en un fichero
 aparte en lugar de dentro de `match.py`.
 
-**Esquema de datos:** `candidatos` (clave única por archivo), `puestos` (clave
-única por SHA-256 de la descripción) y `matches` (única por par candidato-puesto).
-Las tres claves hacen el pipeline idempotente: reprocesar no duplica nada.
+### La base de datos
+
+`candidatos` lleva clave única por archivo, `puestos` por SHA-256 de la
+descripción y `matches` por el par candidato-puesto. Las tres hacen el pipeline
+idempotente: reprocesar no duplica nada.
+
+![Esquema de las tres tablas en MySQL, con tipos, claves y relaciones](docs/bd_esquema.png)
+
+La decisión que más se nota está en la columna `embedding`: **384 números dentro
+de una celda `JSON`**. MySQL 8 no tiene tipo vector, así que el embedding se
+serializa y la similitud se calcula en Python. Es lo que hace explicable el
+proyecto —la fórmula del coseno se lee en `match.py`, en cinco líneas— a costa de
+no escalar a millones de filas. Con 18 candidatos, esa contrapartida no existe.
+
+Y así se ve la tabla `matches` con datos reales, una celda por puntuación
+almacenada:
+
+![Mapa de calor de las 108 puntuaciones almacenadas, 18 candidatos por 6 ofertas](docs/bd_datos.png)
+
+Vale la pena mirarla dos veces. **Los máximos por columna caen donde deben** en
+cinco de las seis ofertas. La excepción es `data engineer`, donde el máximo es la
+ingeniera *junior* — porque esta tabla guarda el **coseno puro**, sin corregir, y
+ese es exactamente el caso que arregla el filtro de requisitos. Y las filas
+enteras encendidas o apagadas son el efecto centroide en crudo: el brillo de una
+fila mide cuánto se parece ese CV a todo, no a algo.
 
 ---
 
