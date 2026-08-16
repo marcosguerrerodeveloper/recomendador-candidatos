@@ -34,7 +34,7 @@ similitud. Sin APIs de pago ni servicios cloud.
 | **Interfaz** | Streamlit 1.61 | Vitrina del ranking, con CSS propio y el ángulo del coseno dibujado |
 | **Pruebas** | pytest 9.1 — **61 pruebas en 6 s** | Cubren el extractor de requisitos. Corren sin base de datos ni modelo cargado, que es la razón de que ese módulo viva aislado |
 | **Infraestructura** | Docker Compose | MySQL reproducible, sin instalar nada en el sistema |
-| **Utilidades** | ReportLab, Playwright | Generación de los 16 CVs ficticios de demo y captura automatizada de las imágenes de este README |
+| **Utilidades** | ReportLab | Generación de los 16 CVs ficticios que sirven de conjunto de prueba, con perfiles de distintas familias y dos controles negativos |
 
 Lo que **no** hay, también a propósito: sin cloud, sin APIs de embeddings de pago,
 sin vector database y sin scraping de portales de empleo. Cada descarte está

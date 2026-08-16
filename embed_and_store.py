@@ -6,7 +6,7 @@ ocupa memoria), asi que conviene aislarlo detras de una funcion que lo cachee.
 El resto de scripts pueden importar `embed()` sin preocuparse de cuando se
 carga el modelo ni de cuantas veces se llama.
 
-Decision cerrada (ver CLAUDE.md): embeddings LOCALES con sentence-transformers,
+Decision cerrada del proyecto: embeddings LOCALES con sentence-transformers,
 modelo multilingue, sin ninguna API externa.
 """
 
